@@ -52,7 +52,9 @@ export function CharacterCard({
               <span className="text-gray-500">소속:</span> {character.affiliation || '-'}
             </p>
             <p>
-              <span className="text-gray-500">등급/직업:</span> {character.rankOrJob || '-'}
+              <span className="text-gray-500">등급:</span> {character.rank || '-'}
+              {' · '}
+              <span className="text-gray-500">직업:</span> {character.job || '-'}
             </p>
           </div>
         </div>

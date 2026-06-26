@@ -42,9 +42,11 @@ export function CharacterDetail({ character }: CharacterDetailProps) {
         <dl className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           <Field label="나이" value={character.age} />
           <Field label="성별" value={character.gender} />
+          <Field label="등급" value={character.rank} />
+          <Field label="직업" value={character.job} />
           <Field label="소속" value={character.affiliation} />
+          <Field label="소속 상세" value={character.affiliationDetail} />
           <Field label="역할" value={character.role} />
-          <Field label="등급/직업" value={character.rankOrJob} />
           <Field label="첫 등장 회차" value={character.firstAppearanceEpisode} />
           <Field
             label="현재 상태"

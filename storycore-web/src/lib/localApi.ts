@@ -11,6 +11,7 @@ import { fileToDataUrl } from './characterImage';
 import type { Character, CharacterSubmitPayload } from '../types/character';
 import type { Episode, EpisodeInput } from '../types/episode';
 import type { Work, WorkInput } from '../types/work';
+import { MAX_WORKS_PER_USER } from '../types/work';
 import type { WorldSetting, WorldSettingInput } from '../types/worldSetting';
 import { generateId, nowISO } from '../utils/id';
 
@@ -35,14 +36,41 @@ function write<T>(key: string, value: T): void {
   localStorage.setItem(key, JSON.stringify(value));
 }
 
+function migrateWork(work: Work & { ranks?: Work['ranks']; jobs?: Work['jobs']; affiliations?: Work['affiliations'] }): Work {
+  return {
+    ...work,
+    ranks: work.ranks ?? [],
+    jobs: work.jobs ?? [],
+    affiliations: work.affiliations ?? [],
+  };
+}
+
+function migrateCharacter(raw: Character & { rankOrJob?: string }): Character {
+  if ('rankOrJob' in raw && raw.rankOrJob !== undefined) {
+    const { rankOrJob, ...rest } = raw;
+    return {
+      ...rest,
+      rank: rest.rank || rankOrJob || '',
+      job: rest.job ?? '',
+      affiliationDetail: rest.affiliationDetail ?? '',
+    };
+  }
+  return {
+    ...raw,
+    rank: raw.rank ?? '',
+    job: raw.job ?? '',
+    affiliationDetail: raw.affiliationDetail ?? '',
+  };
+}
+
 export function fetchLocalData(): StoryCoreData {
   if (isLocalStorageEmpty()) {
     seedLocalSampleData();
   }
 
   return {
-    works: read<Work[]>(KEYS.works, [sampleWork]),
-    characters: read<Character[]>(KEYS.characters, sampleCharacters),
+    works: read<Work[]>(KEYS.works, [sampleWork]).map(migrateWork),
+    characters: read<Character[]>(KEYS.characters, sampleCharacters).map(migrateCharacter),
     episodes: read<Episode[]>(KEYS.episodes, sampleEpisodes),
     worldSettings: read<WorldSetting[]>(KEYS.worldSettings, sampleWorldSettings),
     selectedWorkId: localStorage.getItem(KEYS.selectedWorkId),
@@ -58,9 +86,12 @@ export function upsertLocalSelectedWork(workId: string | null): void {
 }
 
 export function createLocalWork(input: WorkInput): Work {
+  const works = read<Work[]>(KEYS.works, []);
+  if (works.length >= MAX_WORKS_PER_USER) {
+    throw new Error('작품은 1개만 등록할 수 있습니다.');
+  }
   const now = nowISO();
   const work: Work = { ...input, id: generateId(), createdAt: now, updatedAt: now };
-  const works = read<Work[]>(KEYS.works, []);
   write(KEYS.works, [...works, work]);
   return work;
 }

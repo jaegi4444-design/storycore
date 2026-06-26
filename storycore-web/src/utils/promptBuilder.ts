@@ -74,8 +74,12 @@ export function buildWritingPrompt({
     for (const character of episodeCharacters) {
       sections.push(`## ${character.name}${character.alias ? ` (${character.alias})` : ''}`);
       sections.push(`- 역할: ${character.role || '(없음)'}`);
+      sections.push(`- 등급: ${character.rank || '(없음)'}`);
+      sections.push(`- 직업: ${character.job || '(없음)'}`);
       sections.push(`- 소속: ${character.affiliation || '(없음)'}`);
-      sections.push(`- 등급/직업: ${character.rankOrJob || '(없음)'}`);
+      if (character.affiliationDetail) {
+        sections.push(`- 소속 상세: ${character.affiliationDetail}`);
+      }
       sections.push(`- 능력: ${character.abilities || '(없음)'}`);
       sections.push(`- 성격: ${character.personality || '(없음)'}`);
       sections.push(`- 외형: ${character.appearance || '(없음)'}`);

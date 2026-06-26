@@ -1,6 +1,6 @@
 import type { Character, CharacterStatus } from '../types/character';
 import type { Episode } from '../types/episode';
-import type { Work } from '../types/work';
+import type { Work, WorkOption } from '../types/work';
 import type { WorldSetting, WorldSettingCategory } from '../types/worldSetting';
 
 type WorkRow = {
@@ -10,6 +10,9 @@ type WorkRow = {
   one_line_summary: string;
   synopsis: string;
   author_note: string;
+  ranks: WorkOption[] | null;
+  jobs: WorkOption[] | null;
+  affiliations: WorkOption[] | null;
   created_at: string;
   updated_at: string;
 };
@@ -22,8 +25,11 @@ type CharacterRow = {
   age: string;
   gender: string;
   affiliation: string;
+  affiliation_detail: string;
   role: string;
-  rank_or_job: string;
+  rank: string;
+  job: string;
+  rank_or_job?: string;
   abilities: string;
   personality: string;
   appearance: string;
@@ -75,6 +81,9 @@ export function mapWork(row: WorkRow): Work {
     oneLineSummary: row.one_line_summary,
     synopsis: row.synopsis,
     authorNote: row.author_note,
+    ranks: row.ranks ?? [],
+    jobs: row.jobs ?? [],
+    affiliations: row.affiliations ?? [],
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
@@ -89,8 +98,10 @@ export function mapCharacter(row: CharacterRow): Character {
     age: row.age,
     gender: row.gender,
     affiliation: row.affiliation,
+    affiliationDetail: row.affiliation_detail ?? '',
     role: row.role,
-    rankOrJob: row.rank_or_job,
+    rank: row.rank || row.rank_or_job || '',
+    job: row.job ?? '',
     abilities: row.abilities,
     personality: row.personality,
     appearance: row.appearance,
@@ -147,6 +158,23 @@ export function toWorkInsert(userId: string, input: Omit<Work, 'id' | 'createdAt
     one_line_summary: input.oneLineSummary,
     synopsis: input.synopsis,
     author_note: input.authorNote,
+    ranks: input.ranks,
+    jobs: input.jobs,
+    affiliations: input.affiliations,
+  };
+}
+
+export function toWorkUpdate(input: Omit<Work, 'id' | 'createdAt' | 'updatedAt'>) {
+  return {
+    title: input.title,
+    genre: input.genre,
+    one_line_summary: input.oneLineSummary,
+    synopsis: input.synopsis,
+    author_note: input.authorNote,
+    ranks: input.ranks,
+    jobs: input.jobs,
+    affiliations: input.affiliations,
+    updated_at: new Date().toISOString(),
   };
 }
 
@@ -162,8 +190,10 @@ export function toCharacterInsert(
     age: input.age,
     gender: input.gender,
     affiliation: input.affiliation,
+    affiliation_detail: input.affiliationDetail,
     role: input.role,
-    rank_or_job: input.rankOrJob,
+    rank: input.rank,
+    job: input.job,
     abilities: input.abilities,
     personality: input.personality,
     appearance: input.appearance,

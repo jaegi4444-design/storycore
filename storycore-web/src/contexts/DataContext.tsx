@@ -45,7 +45,7 @@ import {
 } from '../lib/storycoreApi';
 import type { Character, CharacterSubmitPayload } from '../types/character';
 import type { Episode, EpisodeInput } from '../types/episode';
-import type { Work, WorkInput } from '../types/work';
+import { MAX_WORKS_PER_USER, type Work, type WorkInput } from '../types/work';
 import type { WorldSetting, WorldSettingInput } from '../types/worldSetting';
 
 type DataContextValue = {
@@ -173,6 +173,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const addWorkHandler = useCallback(
     async (input: WorkInput) => {
       if (!user) return;
+      if (works.length >= MAX_WORKS_PER_USER) return;
       if (isLocalMode) {
         createLocalWork(input);
       } else {
@@ -180,7 +181,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       }
       await refresh();
     },
-    [user, refresh, isLocalMode],
+    [user, refresh, isLocalMode, works.length],
   );
 
   const updateWorkHandler = useCallback(

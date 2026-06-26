@@ -170,7 +170,7 @@ export function App() {
       case 'characters':
         return (
           <CharacterList
-            workId={selectedWorkId}
+            work={selectedWork ?? null}
             characters={workCharacters}
             onAdd={addCharacter}
             onUpdate={updateCharacter}

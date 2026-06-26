@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import type { Character, CharacterInput, CharacterStatus, CharacterSubmitPayload } from '../../types/character';
-import { CHARACTER_STATUS_LABELS } from '../../types/character';
+import { CHARACTER_STATUS_LABELS, characterCategoryError } from '../../types/character';
+import type { Work } from '../../types/work';
+import { hasRequiredWorkCategories, toSelectOptions } from '../../types/work';
 import { ImageUpload } from '../common/ImageUpload';
 import { Input } from '../common/Input';
 import { Modal, ModalFooter } from '../common/Modal';
@@ -10,7 +12,7 @@ import { Textarea } from '../common/Textarea';
 type CharacterFormProps = {
   isOpen: boolean;
   onClose: () => void;
-  workId: string;
+  work: Work;
   character?: Character | null;
   onSubmit: (payload: CharacterSubmitPayload) => void | Promise<void>;
 };
@@ -26,8 +28,10 @@ const emptyForm = (workId: string): CharacterInput => ({
   age: '',
   gender: '',
   affiliation: '',
+  affiliationDetail: '',
   role: '',
-  rankOrJob: '',
+  rank: '',
+  job: '',
   abilities: '',
   personality: '',
   appearance: '',
@@ -42,25 +46,32 @@ const emptyForm = (workId: string): CharacterInput => ({
 export function CharacterForm({
   isOpen,
   onClose,
-  workId,
+  work,
   character,
   onSubmit,
 }: CharacterFormProps) {
-  const [form, setForm] = useState<CharacterInput>(emptyForm(workId));
+  const [form, setForm] = useState<CharacterInput>(emptyForm(work.id));
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [removeImage, setRemoveImage] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const categoriesReady = hasRequiredWorkCategories(work);
+  const rankOptions = toSelectOptions(work.ranks);
+  const jobOptions = toSelectOptions(work.jobs);
+  const affiliationOptions = toSelectOptions(work.affiliations);
 
   useEffect(() => {
     if (character) {
       const { id: _id, createdAt: _c, updatedAt: _u, ...rest } = character;
       setForm(rest);
     } else {
-      setForm(emptyForm(workId));
+      setForm(emptyForm(work.id));
     }
     setImageFile(null);
     setRemoveImage(false);
-  }, [character, isOpen, workId]);
+    setError(null);
+  }, [character, isOpen, work.id]);
 
   const handleImageChange = (file: File | null, remove: boolean) => {
     setImageFile(file);
@@ -69,6 +80,15 @@ export function CharacterForm({
 
   const handleSubmit = async () => {
     if (!form.name.trim() || submitting) return;
+    if (!categoriesReady) {
+      setError('작품에 등급·직업·소속을 먼저 등록해주세요. (작품 관리 → 수정)');
+      return;
+    }
+    const categoryError = characterCategoryError(form);
+    if (categoryError) {
+      setError(categoryError);
+      return;
+    }
     setSubmitting(true);
     try {
       await onSubmit({
@@ -88,6 +108,12 @@ export function CharacterForm({
       title={character ? '캐릭터 수정' : '새 캐릭터'}
       size="xl"
     >
+      {!categoriesReady && (
+        <div className="mb-4 rounded-lg border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-200">
+          이 작품에 등급·직업·소속 카테고리가 없습니다. 작품 관리에서 카테고리를 먼저 등록해주세요.
+        </div>
+      )}
+
       <ImageUpload
         currentImageUrl={character?.imageUrl}
         onChange={handleImageChange}
@@ -115,20 +141,37 @@ export function CharacterForm({
           value={form.gender}
           onChange={(e) => setForm({ ...form, gender: e.target.value })}
         />
-        <Input
+        <Select
+          label="등급"
+          value={form.rank}
+          onChange={(e) => setForm({ ...form, rank: e.target.value })}
+          options={rankOptions}
+          placeholder="등급 선택"
+          required
+          disabled={!categoriesReady}
+        />
+        <Select
+          label="직업"
+          value={form.job}
+          onChange={(e) => setForm({ ...form, job: e.target.value })}
+          options={jobOptions}
+          placeholder="직업 선택"
+          required
+          disabled={!categoriesReady}
+        />
+        <Select
           label="소속"
           value={form.affiliation}
           onChange={(e) => setForm({ ...form, affiliation: e.target.value })}
+          options={affiliationOptions}
+          placeholder="소속 선택"
+          required
+          disabled={!categoriesReady}
         />
         <Input
           label="역할"
           value={form.role}
           onChange={(e) => setForm({ ...form, role: e.target.value })}
-        />
-        <Input
-          label="등급/직업"
-          value={form.rankOrJob}
-          onChange={(e) => setForm({ ...form, rankOrJob: e.target.value })}
         />
         <Input
           label="첫 등장 회차"
@@ -152,6 +195,13 @@ export function CharacterForm({
         />
       </div>
       <div className="mt-4 space-y-4">
+        <Textarea
+          label="소속 상세"
+          value={form.affiliationDetail}
+          onChange={(e) => setForm({ ...form, affiliationDetail: e.target.value })}
+          placeholder="예: 서울팀장 · 현장 지휘관"
+          rows={2}
+        />
         <Textarea
           label="능력"
           value={form.abilities}
@@ -184,6 +234,9 @@ export function CharacterForm({
           rows={2}
         />
       </div>
+
+      {error && <p className="mt-4 text-sm text-red-400">{error}</p>}
+
       <ModalFooter
         onCancel={onClose}
         onConfirm={handleSubmit}

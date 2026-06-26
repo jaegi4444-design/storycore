@@ -9,8 +9,10 @@ export type Character = {
   age: string;
   gender: string;
   affiliation: string;
+  affiliationDetail: string;
   role: string;
-  rankOrJob: string;
+  rank: string;
+  job: string;
 
   abilities: string;
   personality: string;
@@ -43,3 +45,12 @@ export type CharacterSubmitPayload = {
   imageFile?: File | null;
   removeImage?: boolean;
 };
+
+export function characterCategoryError(
+  data: Pick<CharacterInput, 'rank' | 'job' | 'affiliation'>,
+): string | null {
+  if (!data.rank.trim()) return '등급을 선택해주세요.';
+  if (!data.job.trim()) return '직업을 선택해주세요.';
+  if (!data.affiliation.trim()) return '소속을 선택해주세요.';
+  return null;
+}

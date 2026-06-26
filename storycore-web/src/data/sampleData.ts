@@ -1,12 +1,30 @@
 import type { Character } from '../types/character';
 import type { Episode } from '../types/episode';
-import type { Work } from '../types/work';
+import type { Work, WorkOption } from '../types/work';
 import type { WorldSetting } from '../types/worldSetting';
 import { nowISO } from '../utils/id';
 
 const timestamp = nowISO();
 
 export const SAMPLE_WORK_ID = 'sample-work-1';
+
+export const sampleWorkRanks: WorkOption[] = [
+  { id: 'rank-d', name: 'D급' },
+  { id: 'rank-a', name: 'A급' },
+  { id: 'rank-s', name: 'S급' },
+  { id: 'rank-sss', name: 'SSS급' },
+];
+
+export const sampleWorkJobs: WorkOption[] = [
+  { id: 'job-awakened', name: '각성자' },
+  { id: 'job-leader', name: '팀장' },
+  { id: 'job-knight', name: '기사' },
+];
+
+export const sampleWorkAffiliations: WorkOption[] = [
+  { id: 'aff-seoul', name: '국가 각성자 서울팀' },
+  { id: 'aff-hanbing', name: '한빙그룹' },
+];
 
 export const sampleWork: Work = {
   id: SAMPLE_WORK_ID,
@@ -17,6 +35,9 @@ export const sampleWork: Work = {
   synopsis:
     '김가온은 야근 중 모니터에서 열린 균열에 빨려 들어가 이세계로 이동한다. 20년 동안 살아남아 마왕을 토벌한 뒤 지구로 귀환하지만, 지구에도 게이트와 각성자가 존재하게 되었다. 그는 자신의 힘을 감추고 D급 각성자로 위장한 채 한국의 게이트 사건에 휘말린다.',
   authorNote: '',
+  ranks: sampleWorkRanks,
+  jobs: sampleWorkJobs,
+  affiliations: sampleWorkAffiliations,
   createdAt: timestamp,
   updatedAt: timestamp,
 };
@@ -36,8 +57,10 @@ export const sampleCharacters: Character[] = [
     age: '31',
     gender: '남성',
     affiliation: '국가 각성자 서울팀',
+    affiliationDetail: '외부 파견 · 실제 SSS급 전력 은폐',
     role: '주인공',
-    rankOrJob: '외부 D급 / 실제 SSS급',
+    rank: 'D급',
+    job: '각성자',
     abilities: 'Abyss Eye, Sense, Mapping, 어비스 쓰러스트',
     personality:
       '내성적이고 생각이 많다. 남에게 피해 주는 것을 싫어하고, 자신이 피해받는 것도 극도로 싫어한다.',
@@ -59,8 +82,10 @@ export const sampleCharacters: Character[] = [
     age: '38',
     gender: '남성',
     affiliation: '국가 각성자 서울팀',
+    affiliationDetail: '서울팀장 · 현장 지휘관',
     role: '팀장',
-    rankOrJob: 'A급 기사계',
+    rank: 'A급',
+    job: '팀장',
     abilities: '대검, 근접 전투, 지휘',
     personality: '진지하고 카리스마가 있다.',
     appearance: '185cm, 근육질, 숏컷.',
@@ -81,8 +106,10 @@ export const sampleCharacters: Character[] = [
     age: '29',
     gender: '여성',
     affiliation: '한빙그룹',
+    affiliationDetail: 'S급 전투 요원 · 대외 협력 담당',
     role: 'S급 각성자',
-    rankOrJob: 'S급 빙결계 검사',
+    rank: 'S급',
+    job: '기사',
     abilities: '빙결, 검술',
     personality: '차갑고 이성적이다.',
     appearance: '단정하고 서늘한 인상.',
@@ -246,3 +273,14 @@ export function seedLocalSampleData(): void {
 export function isLocalStorageEmpty(): boolean {
   return !localStorage.getItem('storycore_works');
 }
+
+export const sampleWorkSeedInput = {
+  title: sampleWork.title,
+  genre: sampleWork.genre,
+  oneLineSummary: sampleWork.oneLineSummary,
+  synopsis: sampleWork.synopsis,
+  authorNote: sampleWork.authorNote,
+  ranks: sampleWorkRanks,
+  jobs: sampleWorkJobs,
+  affiliations: sampleWorkAffiliations,
+};

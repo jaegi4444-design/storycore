@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import type { Character, CharacterSubmitPayload } from '../../types/character';
+import type { Work } from '../../types/work';
+import { hasRequiredWorkCategories } from '../../types/work';
 import { Button } from '../common/Button';
 import { ConfirmDialog } from '../common/ConfirmDialog';
 import { EmptyState } from '../common/EmptyState';
@@ -8,7 +10,7 @@ import { CharacterDetail } from './CharacterDetail';
 import { CharacterForm } from './CharacterForm';
 
 type CharacterListProps = {
-  workId: string | null;
+  work: Work | null;
   characters: Character[];
   onAdd: (payload: CharacterSubmitPayload) => void | Promise<void>;
   onUpdate: (id: string, payload: CharacterSubmitPayload) => void | Promise<void>;
@@ -16,7 +18,7 @@ type CharacterListProps = {
 };
 
 export function CharacterList({
-  workId,
+  work,
   characters,
   onAdd,
   onUpdate,
@@ -29,7 +31,7 @@ export function CharacterList({
 
   const selectedCharacter = characters.find((c) => c.id === selectedId);
 
-  if (!workId) {
+  if (!work) {
     return (
       <EmptyState
         title="작품을 먼저 선택해주세요"
@@ -38,6 +40,17 @@ export function CharacterList({
     );
   }
 
+  const categoriesReady = hasRequiredWorkCategories(work);
+
+  const handleAddClick = () => {
+    if (!categoriesReady) {
+      alert('작품에 등급·직업·소속을 먼저 등록해주세요. (작품 관리 → 수정)');
+      return;
+    }
+    setEditingCharacter(null);
+    setFormOpen(true);
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -45,21 +58,20 @@ export function CharacterList({
           <h2 className="text-xl font-semibold text-gray-100">캐릭터 관리</h2>
           <p className="mt-1 text-sm text-gray-500">총 {characters.length}명의 캐릭터</p>
         </div>
-        <Button
-          onClick={() => {
-            setEditingCharacter(null);
-            setFormOpen(true);
-          }}
-        >
-          + 새 캐릭터
-        </Button>
+        <Button onClick={handleAddClick}>+ 새 캐릭터</Button>
       </div>
+
+      {!categoriesReady && (
+        <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-200">
+          등급·직업·소속 카테고리가 설정되지 않았습니다. 작품 관리에서 카테고리를 등록한 후 캐릭터를 추가할 수 있습니다.
+        </div>
+      )}
 
       {characters.length === 0 ? (
         <EmptyState
           title="등록된 캐릭터가 없습니다"
           description="작품에 등장하는 캐릭터를 추가해보세요."
-          action={<Button onClick={() => setFormOpen(true)}>캐릭터 추가</Button>}
+          action={<Button onClick={handleAddClick}>캐릭터 추가</Button>}
         />
       ) : (
         <div className="grid gap-6 lg:grid-cols-5">
@@ -99,7 +111,7 @@ export function CharacterList({
           setFormOpen(false);
           setEditingCharacter(null);
         }}
-        workId={workId}
+        work={work}
         character={editingCharacter}
         onSubmit={async (payload) => {
           if (editingCharacter) {

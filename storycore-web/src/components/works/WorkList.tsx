@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import type { Work } from '../../types/work';
+import { MAX_WORKS_PER_USER } from '../../types/work';
 import { Button } from '../common/Button';
 import { ConfirmDialog } from '../common/ConfirmDialog';
 import { EmptyState } from '../common/EmptyState';
+import { Modal } from '../common/Modal';
 import { WorkForm } from './WorkForm';
 
 type WorkListProps = {
@@ -26,6 +28,7 @@ export function WorkList({
   const [editingWork, setEditingWork] = useState<Work | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Work | null>(null);
   const [viewingWork, setViewingWork] = useState<Work | null>(null);
+  const [limitWarningOpen, setLimitWarningOpen] = useState(false);
 
   const handleEdit = (work: Work) => {
     setEditingWork(work);
@@ -37,21 +40,32 @@ export function WorkList({
     setEditingWork(null);
   };
 
+  const handleAddClick = () => {
+    if (works.length >= MAX_WORKS_PER_USER) {
+      setLimitWarningOpen(true);
+      return;
+    }
+    setEditingWork(null);
+    setFormOpen(true);
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h2 className="text-xl font-semibold text-gray-100">작품 관리</h2>
-          <p className="mt-1 text-sm text-gray-500">작품을 생성하고 선택하여 설정을 관리하세요.</p>
+          <p className="mt-1 text-sm text-gray-500">
+            현재 {works.length}/{MAX_WORKS_PER_USER}개 작품 · 작품별 등급·직업·소속을 설정합니다.
+          </p>
         </div>
-        <Button onClick={() => setFormOpen(true)}>+ 새 작품</Button>
+        <Button onClick={handleAddClick}>+ 새 작품</Button>
       </div>
 
       {works.length === 0 ? (
         <EmptyState
           title="등록된 작품이 없습니다"
           description="첫 작품을 추가하고 캐릭터, 회차, 세계관 설정을 관리해보세요."
-          action={<Button onClick={() => setFormOpen(true)}>작품 추가</Button>}
+          action={<Button onClick={handleAddClick}>작품 추가</Button>}
         />
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -78,6 +92,9 @@ export function WorkList({
                 )}
               </div>
               <p className="line-clamp-2 text-sm text-gray-400">{work.oneLineSummary}</p>
+              <p className="mt-2 text-xs text-gray-500">
+                등급 {work.ranks.length} · 직업 {work.jobs.length} · 소속 {work.affiliations.length}
+              </p>
               <div className="mt-4 flex flex-wrap gap-2">
                 <Button
                   variant={selectedWorkId === work.id ? 'secondary' : 'primary'}
@@ -115,6 +132,17 @@ export function WorkList({
         }}
       />
 
+      <Modal isOpen={limitWarningOpen} onClose={() => setLimitWarningOpen(false)} title="작품 개수 제한" size="md">
+        <p className="text-sm text-gray-400">
+          현재는 작품을 1개만 등록할 수 있습니다. 여러 작품 관리 기능은 추후 업데이트에서 지원할 예정입니다.
+        </p>
+        <div className="mt-6 flex justify-end">
+          <Button variant="secondary" onClick={() => setLimitWarningOpen(false)}>
+            확인
+          </Button>
+        </div>
+      </Modal>
+
       {viewingWork && (
         <div className="fixed inset-0 z-50 flex items-end justify-center p-4 sm:items-center">
           <div className="absolute inset-0 bg-black/60" onClick={() => setViewingWork(null)} />
@@ -125,6 +153,9 @@ export function WorkList({
               <DetailRow label="한 줄 소개" value={viewingWork.oneLineSummary} />
               <DetailRow label="전체 줄거리" value={viewingWork.synopsis} multiline />
               <DetailRow label="작가 메모" value={viewingWork.authorNote} multiline />
+              <CategoryRow label="등급" items={viewingWork.ranks.map((r) => r.name)} />
+              <CategoryRow label="직업" items={viewingWork.jobs.map((j) => j.name)} />
+              <CategoryRow label="소속" items={viewingWork.affiliations.map((a) => a.name)} />
             </div>
             <div className="mt-6 flex justify-end">
               <Button variant="secondary" onClick={() => setViewingWork(null)}>
@@ -160,6 +191,25 @@ function DetailRow({
       <dt className="font-medium text-gray-400">{label}</dt>
       <dd className={`mt-1 text-gray-200 ${multiline ? 'whitespace-pre-wrap' : ''}`}>
         {value || '(없음)'}
+      </dd>
+    </div>
+  );
+}
+
+function CategoryRow({ label, items }: { label: string; items: string[] }) {
+  return (
+    <div>
+      <dt className="font-medium text-gray-400">{label}</dt>
+      <dd className="mt-2 flex flex-wrap gap-2">
+        {items.length === 0 ? (
+          <span className="text-gray-500">(없음)</span>
+        ) : (
+          items.map((item) => (
+            <span key={item} className="rounded-full bg-surface-overlay px-2 py-0.5 text-xs text-gray-300">
+              {item}
+            </span>
+          ))
+        )}
       </dd>
     </div>
   );
