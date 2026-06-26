@@ -1,19 +1,42 @@
 # Vercel 배포 가이드
 
+## 0. GitHub에 올리기 (먼저)
+
+```powershell
+cd d:\first
+
+# GitHub 로그인 (브라우저에서 코드 입력)
+gh auth login
+
+# 저장소 생성 + push (이름은 원하는 대로 변경)
+gh repo create storycore --public --source=. --remote=origin --push
+```
+
+이미 GitHub에 저장소가 있으면:
+
+```powershell
+git remote add origin https://github.com/YOUR_USERNAME/storycore.git
+git branch -M main
+git push -u origin main
+```
+
+> `.env` 파일은 `.gitignore`에 포함되어 GitHub에 올라가지 않습니다.
+
+---
+
 ## 방법 A: Vercel 대시보드 (추천)
 
-1. [vercel.com](https://vercel.com) 로그인 (GitHub 연동)
-2. **Add New → Project**
-3. 저장소 import (또는 `storycore-web` 폴더만 업로드)
-4. **Root Directory**: `storycore-web` (저장소 루트가 `d:\first`인 경우)
-5. **Environment Variables** 추가:
+1. [vercel.com/new](https://vercel.com/new) 로그인
+2. **Import Git Repository** → GitHub 연동 → `storycore` 저장소 선택
+3. **Root Directory** → **Edit** → `storycore-web` 입력
+4. **Environment Variables** 추가:
 
 | Name | Value |
 |------|--------|
 | `VITE_SUPABASE_URL` | Supabase Project URL |
 | `VITE_SUPABASE_ANON_KEY` | Supabase anon key |
 
-6. **Deploy** 클릭
+5. **Deploy** 클릭
 
 배포 URL 예: `https://storycore-web.vercel.app`
 
