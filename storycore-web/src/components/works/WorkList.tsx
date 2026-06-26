@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import type { Work } from '../../types/work';
-import { MAX_WORKS_PER_USER } from '../../types/work';
+import { hasRequiredWorkCategories, MAX_WORKS_PER_USER } from '../../types/work';
 import { Button } from '../common/Button';
 import { ConfirmDialog } from '../common/ConfirmDialog';
 import { EmptyState } from '../common/EmptyState';
 import { Modal } from '../common/Modal';
+import { WorkCategorySection } from './WorkCategorySection';
 import { WorkForm } from './WorkForm';
 
 type WorkListProps = {
@@ -16,6 +17,19 @@ type WorkListProps = {
   onDelete: (id: string) => void;
 };
 
+function toWorkInput(work: Work): Omit<Work, 'id' | 'createdAt' | 'updatedAt'> {
+  return {
+    title: work.title,
+    genre: work.genre,
+    oneLineSummary: work.oneLineSummary,
+    synopsis: work.synopsis,
+    authorNote: work.authorNote,
+    ranks: work.ranks,
+    jobs: work.jobs,
+    affiliations: work.affiliations,
+  };
+}
+
 export function WorkList({
   works,
   selectedWorkId,
@@ -25,19 +39,29 @@ export function WorkList({
   onDelete,
 }: WorkListProps) {
   const [formOpen, setFormOpen] = useState(false);
+  const [formInitialTab, setFormInitialTab] = useState<'info' | 'categories'>('info');
   const [editingWork, setEditingWork] = useState<Work | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Work | null>(null);
   const [viewingWork, setViewingWork] = useState<Work | null>(null);
   const [limitWarningOpen, setLimitWarningOpen] = useState(false);
 
-  const handleEdit = (work: Work) => {
+  const categoryWork = useMemo(() => {
+    if (selectedWorkId) {
+      return works.find((w) => w.id === selectedWorkId) ?? null;
+    }
+    return works[0] ?? null;
+  }, [works, selectedWorkId]);
+
+  const handleEdit = (work: Work, tab: 'info' | 'categories' = 'info') => {
     setEditingWork(work);
+    setFormInitialTab(tab);
     setFormOpen(true);
   };
 
   const handleFormClose = () => {
     setFormOpen(false);
     setEditingWork(null);
+    setFormInitialTab('info');
   };
 
   const handleAddClick = () => {
@@ -46,6 +70,7 @@ export function WorkList({
       return;
     }
     setEditingWork(null);
+    setFormInitialTab('info');
     setFormOpen(true);
   };
 
@@ -55,7 +80,7 @@ export function WorkList({
         <div>
           <h2 className="text-xl font-semibold text-gray-100">작품 관리</h2>
           <p className="mt-1 text-sm text-gray-500">
-            현재 {works.length}/{MAX_WORKS_PER_USER}개 작품 · 작품별 등급·직업·소속을 설정합니다.
+            현재 {works.length}/{MAX_WORKS_PER_USER}개 작품 · 등급·직업·소속을 각각 등록합니다.
           </p>
         </div>
         <Button onClick={handleAddClick}>+ 새 작품</Button>
@@ -64,64 +89,100 @@ export function WorkList({
       {works.length === 0 ? (
         <EmptyState
           title="등록된 작품이 없습니다"
-          description="첫 작품을 추가하고 캐릭터, 회차, 세계관 설정을 관리해보세요."
+          description="첫 작품을 추가하고 등급·직업·소속 카테고리를 설정해보세요."
           action={<Button onClick={handleAddClick}>작품 추가</Button>}
         />
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {works.map((work) => (
-            <div
-              key={work.id}
-              className={`group rounded-xl border bg-surface-raised p-5 transition-all hover:border-accent/40 ${
-                selectedWorkId === work.id
-                  ? 'border-accent ring-1 ring-accent/30'
-                  : 'border-surface-border'
-              }`}
-            >
-              <div className="mb-3 flex items-start justify-between gap-2">
-                <div className="min-w-0 flex-1">
-                  <h3 className="truncate font-semibold text-gray-100">{work.title}</h3>
-                  <span className="mt-1 inline-block rounded-full bg-surface-overlay px-2 py-0.5 text-xs text-gray-400">
-                    {work.genre}
-                  </span>
-                </div>
-                {selectedWorkId === work.id && (
-                  <span className="shrink-0 rounded-full bg-accent/20 px-2 py-0.5 text-xs font-medium text-accent-hover">
-                    선택됨
-                  </span>
-                )}
-              </div>
-              <p className="line-clamp-2 text-sm text-gray-400">{work.oneLineSummary}</p>
-              <p className="mt-2 text-xs text-gray-500">
-                등급 {work.ranks.length} · 직업 {work.jobs.length} · 소속 {work.affiliations.length}
-              </p>
-              <div className="mt-4 flex flex-wrap gap-2">
-                <Button
-                  variant={selectedWorkId === work.id ? 'secondary' : 'primary'}
-                  className="flex-1 text-xs sm:flex-none"
-                  onClick={() => onSelect(work.id)}
+        <>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {works.map((work) => {
+              const categoriesReady = hasRequiredWorkCategories(work);
+              return (
+                <div
+                  key={work.id}
+                  className={`group rounded-xl border bg-surface-raised p-5 transition-all hover:border-accent/40 ${
+                    selectedWorkId === work.id
+                      ? 'border-accent ring-1 ring-accent/30'
+                      : 'border-surface-border'
+                  }`}
                 >
-                  {selectedWorkId === work.id ? '선택됨' : '선택'}
-                </Button>
-                <Button variant="ghost" className="text-xs" onClick={() => setViewingWork(work)}>
-                  상세
-                </Button>
-                <Button variant="ghost" className="text-xs" onClick={() => handleEdit(work)}>
-                  수정
-                </Button>
-                <Button variant="ghost" className="text-xs text-red-400" onClick={() => setDeleteTarget(work)}>
-                  삭제
-                </Button>
-              </div>
-            </div>
-          ))}
-        </div>
+                  <div className="mb-3 flex items-start justify-between gap-2">
+                    <div className="min-w-0 flex-1">
+                      <h3 className="truncate font-semibold text-gray-100">{work.title}</h3>
+                      <span className="mt-1 inline-block rounded-full bg-surface-overlay px-2 py-0.5 text-xs text-gray-400">
+                        {work.genre}
+                      </span>
+                    </div>
+                    {selectedWorkId === work.id && (
+                      <span className="shrink-0 rounded-full bg-accent/20 px-2 py-0.5 text-xs font-medium text-accent-hover">
+                        선택됨
+                      </span>
+                    )}
+                  </div>
+                  <p className="line-clamp-2 text-sm text-gray-400">{work.oneLineSummary}</p>
+                  <div className="mt-2 flex flex-wrap gap-2 text-xs">
+                    <CategoryBadge label="등급" count={work.ranks.length} tone="violet" />
+                    <CategoryBadge label="직업" count={work.jobs.length} tone="sky" />
+                    <CategoryBadge label="소속" count={work.affiliations.length} tone="emerald" />
+                  </div>
+                  {!categoriesReady && (
+                    <p className="mt-2 text-xs text-amber-400">등급·직업·소속 등록 필요</p>
+                  )}
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    <Button
+                      variant={selectedWorkId === work.id ? 'secondary' : 'primary'}
+                      className="flex-1 text-xs sm:flex-none"
+                      onClick={() => onSelect(work.id)}
+                    >
+                      {selectedWorkId === work.id ? '선택됨' : '선택'}
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      className="text-xs text-accent-hover"
+                      onClick={() => handleEdit(work, 'categories')}
+                    >
+                      카테고리
+                    </Button>
+                    <Button variant="ghost" className="text-xs" onClick={() => setViewingWork(work)}>
+                      상세
+                    </Button>
+                    <Button variant="ghost" className="text-xs" onClick={() => handleEdit(work)}>
+                      수정
+                    </Button>
+                    <Button variant="ghost" className="text-xs text-red-400" onClick={() => setDeleteTarget(work)}>
+                      삭제
+                    </Button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {categoryWork && (
+            <WorkCategorySection
+              work={categoryWork}
+              onSave={async (categories) => {
+                onUpdate(categoryWork.id, {
+                  ...toWorkInput(categoryWork),
+                  ...categories,
+                });
+              }}
+            />
+          )}
+
+          {!selectedWorkId && works.length > 0 && (
+            <p className="text-center text-xs text-gray-500">
+              작품을 선택하면 해당 작품의 카테고리를 관리할 수 있습니다. (현재: {categoryWork?.title})
+            </p>
+          )}
+        </>
       )}
 
       <WorkForm
         isOpen={formOpen}
         onClose={handleFormClose}
         work={editingWork}
+        initialTab={formInitialTab}
         onSubmit={(data) => {
           if (editingWork) {
             onUpdate(editingWork.id, data);
@@ -174,6 +235,28 @@ export function WorkList({
         message={`"${deleteTarget?.title}" 작품을 삭제하시겠습니까? 관련 캐릭터, 회차, 세계관 데이터는 유지되지만 더 이상 이 작품에 연결되지 않을 수 있습니다.`}
       />
     </div>
+  );
+}
+
+function CategoryBadge({
+  label,
+  count,
+  tone,
+}: {
+  label: string;
+  count: number;
+  tone: 'violet' | 'sky' | 'emerald';
+}) {
+  const toneClass = {
+    violet: count > 0 ? 'bg-violet-500/15 text-violet-300' : 'bg-surface-overlay text-gray-500',
+    sky: count > 0 ? 'bg-sky-500/15 text-sky-300' : 'bg-surface-overlay text-gray-500',
+    emerald: count > 0 ? 'bg-emerald-500/15 text-emerald-300' : 'bg-surface-overlay text-gray-500',
+  }[tone];
+
+  return (
+    <span className={`rounded-full px-2 py-0.5 ${toneClass}`}>
+      {label} {count}
+    </span>
   );
 }
 

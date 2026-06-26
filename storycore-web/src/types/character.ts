@@ -49,8 +49,8 @@ export type CharacterSubmitPayload = {
 export function characterCategoryError(
   data: Pick<CharacterInput, 'rank' | 'job' | 'affiliation'>,
 ): string | null {
-  if (!data.rank.trim()) return '등급을 선택해주세요.';
-  if (!data.job.trim()) return '직업을 선택해주세요.';
-  if (!data.affiliation.trim()) return '소속을 선택해주세요.';
+  if (!data.rank.trim()) return '등급을 입력해주세요.';
+  if (!data.job.trim()) return '직업을 입력해주세요.';
+  if (!data.affiliation.trim()) return '소속을 입력해주세요.';
   return null;
 }
