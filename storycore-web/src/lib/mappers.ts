@@ -29,7 +29,6 @@ type CharacterRow = {
   role: string;
   rank: string;
   job: string;
-  rank_or_job?: string;
   abilities: string;
   personality: string;
   appearance: string;
@@ -100,7 +99,7 @@ export function mapCharacter(row: CharacterRow): Character {
     affiliation: row.affiliation,
     affiliationDetail: row.affiliation_detail ?? '',
     role: row.role,
-    rank: row.rank || row.rank_or_job || '',
+    rank: row.rank ?? '',
     job: row.job ?? '',
     abilities: row.abilities,
     personality: row.personality,

@@ -17,10 +17,12 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
 }
 
 function Field({ label, value }: { label: string; value: string | number | null }) {
+  const display =
+    value === null || value === undefined || value === '' ? '(없음)' : String(value);
   return (
     <div>
       <dt className="text-xs text-gray-500">{label}</dt>
-      <dd className="mt-0.5 text-sm text-gray-200">{value ?? '(없음)'}</dd>
+      <dd className="mt-0.5 text-sm text-gray-200">{display}</dd>
     </div>
   );
 }

@@ -46,20 +46,12 @@ function migrateWork(work: Work & { ranks?: Work['ranks']; jobs?: Work['jobs']; 
 }
 
 function migrateCharacter(raw: Character & { rankOrJob?: string }): Character {
-  if ('rankOrJob' in raw && raw.rankOrJob !== undefined) {
-    const { rankOrJob, ...rest } = raw;
-    return {
-      ...rest,
-      rank: rest.rank || rankOrJob || '',
-      job: rest.job ?? '',
-      affiliationDetail: rest.affiliationDetail ?? '',
-    };
-  }
+  const { rankOrJob, ...rest } = raw as Character & { rankOrJob?: string };
   return {
-    ...raw,
-    rank: raw.rank ?? '',
-    job: raw.job ?? '',
-    affiliationDetail: raw.affiliationDetail ?? '',
+    ...rest,
+    rank: rest.rank?.trim() ? rest.rank : (rankOrJob ?? ''),
+    job: rest.job ?? '',
+    affiliationDetail: rest.affiliationDetail ?? '',
   };
 }
 

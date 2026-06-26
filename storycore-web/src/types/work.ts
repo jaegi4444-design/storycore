@@ -43,3 +43,35 @@ export function workCategoryError(work: Pick<Work, 'ranks' | 'jobs' | 'affiliati
 export function toSelectOptions(options: WorkOption[]) {
   return options.map((o) => ({ value: o.name, label: o.name }));
 }
+
+/** 캐릭터 폼 셀렉트 — 작품 카테고리 + 기존 저장값(레거시) 포함 */
+export function toCharacterSelectOptions(options: WorkOption[], currentValue = '') {
+  const names = new Set<string>();
+  for (const option of options) {
+    if (option.name.trim()) names.add(option.name.trim());
+  }
+  if (currentValue.trim()) names.add(currentValue.trim());
+  return Array.from(names)
+    .sort((a, b) => a.localeCompare(b, 'ko'))
+    .map((name) => ({ value: name, label: name }));
+}
+
+export function buildFilterOptions(
+  workOptions: WorkOption[],
+  characterValues: string[],
+  allLabel: string,
+) {
+  const names = new Set<string>();
+  for (const option of workOptions) {
+    if (option.name.trim()) names.add(option.name.trim());
+  }
+  for (const value of characterValues) {
+    if (value.trim()) names.add(value.trim());
+  }
+  return [
+    { value: '', label: allLabel },
+    ...Array.from(names)
+      .sort((a, b) => a.localeCompare(b, 'ko'))
+      .map((name) => ({ value: name, label: name })),
+  ];
+}
