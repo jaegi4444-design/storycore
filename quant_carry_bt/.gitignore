@@ -1,0 +1,16 @@
+# Python
+__pycache__/
+*.pyc
+
+# Local data cache (regenerable via data/cache.py)
+data/cache/
+
+# Generated report artifacts (regenerable via scripts/generate_report.py / main.py --walkforward)
+reports/
+BACKTEST_RESULTS_FAST.md
+
+# Claude Code local settings
+.claude/settings.local.json
+
+# Virtualenv
+venv/
