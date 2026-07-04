@@ -4,51 +4,65 @@
 {% block title %}{{ child.child_name }} 거래내역 — 묘동 유치원{% endblock %}
 
 {% block content %}
-<section class="card">
-  <p class="page-eyebrow">📒 거래내역</p>
-  <h1 class="page-title">{{ child.child_name }}</h1>
-  <p class="text-muted">
-    현재 잔액:
-    <span class="balance-highlight">{{ bean_icon('sm') }} <strong>{{ balance }}{{ currency_name }}</strong></span>
-  </p>
+<div class="page-container">
+  <section class="app-card">
+    <header class="app-card__header">
+      <p class="page-eyebrow">📒 거래내역</p>
+      <h1 class="page-title">{{ child.child_name }}</h1>
+      <div class="balance-box balance-box--inline">
+        <span class="balance-box__label">현재 잔액</span>
+        <span class="balance-box__value">
+          {{ bean_icon('sm') }}
+          <strong>{{ balance }}{{ currency_name }}</strong>
+        </span>
+      </div>
+    </header>
 
-  {% if transactions %}
-  <div class="table-scroll">
-    <table class="txn-table">
-      <thead>
-        <tr>
-          <th>거래일시</th>
-          <th>유형</th>
-          <th>수량</th>
-          <th>이전</th>
-          <th>이후</th>
-          <th>메모</th>
-          <th>선생님</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for tx in transactions %}
-        <tr>
-          <td>{{ tx.created_at or '-' }}</td>
-          <td><span class="txn-type txn-type--{{ tx.transaction_type|lower }}">{{ tx.type_label }}</span></td>
-          <td>{{ tx.amount }}</td>
-          <td>{{ tx.balance_before }}</td>
-          <td>{{ tx.balance_after }}</td>
-          <td>{{ tx.memo or '-' }}</td>
-          <td>{{ tx.teacher_name or '-' }}</td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </div>
-  {% else %}
-  <div class="empty-state">
-    <p>아직 거래내역이 없어요.</p>
-  </div>
-  {% endif %}
+    {% if transactions %}
+    <div class="table-card">
+      <div class="table-scroll">
+        <table class="txn-table">
+          <thead>
+            <tr>
+              <th>거래일시</th>
+              <th>유형</th>
+              <th class="txn-table__num">수량</th>
+              <th class="txn-table__num">이전</th>
+              <th class="txn-table__num">이후</th>
+              <th>메모</th>
+              <th>선생님</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for tx in transactions %}
+            <tr>
+              <td>{{ tx.created_at or '-' }}</td>
+              <td>
+                <span class="transaction-badge transaction-badge--{{ tx.transaction_type|lower }}">
+                  {{ tx.type_label }}
+                </span>
+              </td>
+              <td class="txn-table__num txn-table__amount">{{ tx.amount }}</td>
+              <td class="txn-table__num">{{ tx.balance_before }}</td>
+              <td class="txn-table__num">{{ tx.balance_after }}</td>
+              <td>{{ tx.memo or '-' }}</td>
+              <td>{{ tx.teacher_name or '-' }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    {% else %}
+    <div class="empty-state empty-state--compact">
+      <div class="empty-state__icon" aria-hidden="true">📒</div>
+      <p class="empty-state__text">아직 거래내역이 없어요.</p>
+    </div>
+    {% endif %}
 
-  <div class="back-link">
-    <a href="/classes/manage" class="btn btn-secondary">← 아이 목록</a>
-  </div>
-</section>
+    <div class="back-link back-link--left">
+      <a href="/classes/manage" class="btn btn-secondary">← 아이 목록</a>
+    </div>
+  </section>
+</div>
 {% endblock %}
