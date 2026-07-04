@@ -35,7 +35,7 @@
           <tbody>
             {% for tx in transactions %}
             <tr>
-              <td>{{ tx.created_at or '-' }}</td>
+              <td class="txn-table__datetime">{{ tx.created_at | format_tx_datetime }}</td>
               <td>{{ tx.child_name or '-' }}</td>
               <td>
                 <span class="transaction-badge transaction-badge--{{ tx.transaction_type|lower }}">
