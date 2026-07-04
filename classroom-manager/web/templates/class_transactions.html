@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% from "macros.html" import bean_icon %}
+
+{% block title %}반 거래내역 — 묘동 유치원{% endblock %}
+
+{% block content %}
+<section class="card">
+  <p class="page-eyebrow">📒 반 전체 거래내역</p>
+  <h1 class="page-title">{{ school_class.class_name }}</h1>
+  <p class="text-muted">화폐 단위: {{ bean_icon('sm') }} {{ currency_name }}</p>
+
+  {# TODO: 아이 선택, 거래유형, 기간 필터 #}
+
+  {% if transactions %}
+  <div class="table-scroll">
+    <table class="txn-table">
+      <thead>
+        <tr>
+          <th>거래일시</th>
+          <th>아이</th>
+          <th>유형</th>
+          <th>수량</th>
+          <th>이전</th>
+          <th>이후</th>
+          <th>메모</th>
+          <th>선생님</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for tx in transactions %}
+        <tr>
+          <td>{{ tx.created_at or '-' }}</td>
+          <td>{{ tx.child_name or '-' }}</td>
+          <td><span class="txn-type txn-type--{{ tx.transaction_type|lower }}">{{ tx.type_label }}</span></td>
+          <td>{{ tx.amount }}</td>
+          <td>{{ tx.balance_before }}</td>
+          <td>{{ tx.balance_after }}</td>
+          <td>{{ tx.memo or '-' }}</td>
+          <td>{{ tx.teacher_name or '-' }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="empty-state">
+    <p>아직 거래내역이 없어요.</p>
+  </div>
+  {% endif %}
+
+  <div class="back-link">
+    <a href="/classes/manage" class="btn btn-secondary">← 아이 목록</a>
+  </div>
+</section>
+{% endblock %}

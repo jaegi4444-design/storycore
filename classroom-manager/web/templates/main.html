@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% from "macros.html" import bean_icon %}
+
+{% block title %}메인 — 묘동 유치원{% endblock %}
+
+{% block content %}
+<section class="card welcome-hero">
+  <div class="welcome-emoji">👋</div>
+  <h1 class="page-title">안녕하세요, {{ user.name }} 선생님!</h1>
+  <p class="page-subtitle">반 아이들을 관리하고, 콩으로 보상을 줄 수 있어요</p>
+
+  <div class="bean-badge">
+    <span>우리 반 화폐는 <strong class="bean-with-icon">{{ bean_icon('sm') }} 콩</strong>이에요</span>
+  </div>
+
+  <div class="welcome-actions">
+    {% if school_class %}
+    <a href="/classes/manage" class="btn btn-primary btn-lg">내 반 관리하기</a>
+    {% else %}
+    <a href="/classes/create" class="btn btn-primary btn-lg">우리 반 만들기</a>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,2 @@
+-- storycore-web/supabase/migrations/003_classroom_manager.sql 과 동일
+-- Supabase SQL Editor: storycore-web 쪽 파일을 실행하세요.

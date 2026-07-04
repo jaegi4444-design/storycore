@@ -1,0 +1,52 @@
+{% from "macros.html" import bean_icon %}
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}묘동 유치원{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Noto+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/static/css/style.css" />
+</head>
+<body class="{% block body_class %}{% endblock %}">
+  <div class="app">
+    {% if user is defined and user %}
+    <header class="header">
+      <div class="header-inner">
+        <a href="/" class="logo">
+          {{ bean_icon('md') }}
+          <span>묘동 유치원</span>
+        </a>
+        <div class="header-actions">
+          <span class="user-badge">
+            <span class="user-badge-icon">👩‍🏫</span>
+            {{ user.name }} 선생님
+          </span>
+          <form method="post" action="/logout" class="inline-form">
+            <button type="submit" class="btn btn-ghost btn-sm">로그아웃</button>
+          </form>
+        </div>
+      </div>
+    </header>
+    {% endif %}
+
+    <main class="main {% block main_class %}{% endblock %}">
+      {% if flashes %}
+      <div class="flash-list">
+        {% for flash in flashes %}
+        <div class="flash flash-{{ flash.category }}">
+          {% if flash.category == 'error' %}⚠️{% elif flash.category == 'success' %}✅{% else %}💡{% endif %}
+          {{ flash.message }}
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      {% block content %}{% endblock %}
+    </main>
+  </div>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

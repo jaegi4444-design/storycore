@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% from "macros.html" import bean_icon %}
+
+{% block title %}반 만들기 — 묘동 유치원{% endblock %}
+
+{% block content %}
+<section class="card card-narrow">
+  <p class="page-eyebrow">🏫 새 반 만들기</p>
+  <h1 class="page-title">우리 반 만들기</h1>
+
+  <div class="tip-box">
+    <span class="tip-box-icon">💡</span>
+    <span>한 선생님은 하나의 반만 만들 수 있어요.</span>
+  </div>
+
+  <form method="post" action="/classes/create" class="form">
+    <div class="form-group">
+      <label for="class_name">반 이름</label>
+      <input
+        type="text"
+        id="class_name"
+        name="class_name"
+        placeholder="예: 3학년 2반"
+        required
+        maxlength="100"
+      />
+    </div>
+
+    <div class="form-group">
+      <label for="currency_code" class="currency-label">
+        화폐 단위 {{ bean_icon('sm') }}
+      </label>
+      <select id="currency_code" name="currency_code" required>
+        {% for currency in currencies %}
+        <option value="{{ currency.code }}" {% if currency.code == default_currency %}selected{% endif %}>
+          {{ currency.code_name }}
+        </option>
+        </option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="form-actions">
+      <a href="/" class="btn btn-secondary">뒤로가기</a>
+      <button type="submit" class="btn btn-primary">저장하기</button>
+    </div>
+  </form>
+</section>
+{% endblock %}

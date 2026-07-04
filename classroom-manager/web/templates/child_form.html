@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+
+{% block title %}{{ page_title }} — 묘동 유치원{% endblock %}
+
+{% block content %}
+<section class="card card-narrow">
+  <p class="page-eyebrow">{% if child %}✏️ 아이 수정{% else %}🌱 아이 등록{% endif %}</p>
+  <h1 class="page-title">{{ page_title }}</h1>
+  <p class="text-muted">반: <strong>{{ school_class.class_name }}</strong></p>
+
+  <form
+    method="post"
+    action="{{ form_action }}"
+    enctype="multipart/form-data"
+    class="form"
+  >
+    <div class="form-group">
+      <label for="child_name">아이 이름</label>
+      <input
+        type="text"
+        id="child_name"
+        name="child_name"
+        value="{{ child.child_name if child else '' }}"
+        placeholder="아이 이름을 입력해 주세요"
+        required
+        maxlength="100"
+      />
+    </div>
+
+    <div class="form-group">
+      <label for="company_name">회사 (선택)</label>
+      <input
+        type="text"
+        id="company_name"
+        name="company_name"
+        value="{{ child.company_name if child and child.company_name else '' }}"
+        placeholder="예: 콩콩 농장"
+        maxlength="100"
+      />
+    </div>
+
+    <div class="form-group">
+      <label>프로필 사진</label>
+      <div class="photo-preview-wrap">
+        <img src="{{ photo_display }}" alt="프로필 미리보기" class="photo-preview" />
+        <span class="photo-preview-label">미리보기</span>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="photo_file">사진 업로드 (선택)</label>
+      <input type="file" id="photo_file" name="photo_file" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" />
+      <p class="hint">jpg, jpeg, png, webp · 최대 5MB</p>
+    </div>
+
+    <div class="form-group">
+      <label for="photo_url">사진 URL (선택)</label>
+      <input
+        type="url"
+        id="photo_url"
+        name="photo_url"
+        value="{{ child.photo_url if child and child.photo_url else '' }}"
+        placeholder="https://example.com/photo.jpg"
+      />
+      {# TODO: 파일 업로드 외부 스토리지(S3 등) 연동 시 photo_url과 우선순위 정책 확장 #}
+    </div>
+
+    {% if child and (child.photo_path or child.photo_url) %}
+    <div class="form-group checkbox-group">
+      <label>
+        <input type="checkbox" name="remove_photo" value="1" />
+        기존 사진 제거 (업로드/URL 없이 저장 시)
+      </label>
+    </div>
+    {% endif %}
+
+    <div class="form-actions">
+      <a href="/classes/manage" class="btn btn-secondary">목록으로</a>
+      <button type="submit" class="btn btn-primary">저장하기</button>
+    </div>
+  </form>
+</section>
+{% endblock %}

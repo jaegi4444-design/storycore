@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% from "macros.html" import bean_icon %}
+
+{% block title %}로그인 — 묘동 유치원{% endblock %}
+{% block main_class %}main--auth{% endblock %}
+
+{% block content %}
+<div class="auth-wrap">
+  <section class="card card-narrow auth-card">
+    <div class="auth-brand">
+      <div class="card-icon">🏫</div>
+      <h1 class="auth-brand-title auth-brand-title-wrap">
+        {{ bean_icon('lg') }}
+        <span>묘동 유치원</span>
+      </h1>
+      <p class="auth-brand-sub">우리 반 아이들과 콩을 관리해요</p>
+    </div>
+
+    <div class="auth-icons" aria-hidden="true">
+      {{ bean_icon('md') }}
+      <span>🌱</span>
+      <span>👩‍🏫</span>
+    </div>
+
+    <form method="post" action="/login" class="form auth-form">
+      <div class="form-group">
+        <label for="name">선생님 이름</label>
+        <input
+          type="text"
+          id="name"
+          name="name"
+          placeholder="이름을 입력해 주세요"
+          required
+          autofocus
+          maxlength="100"
+        />
+      </div>
+      <button type="submit" class="btn btn-primary btn-block btn-lg">로그인하기</button>
+    </form>
+
+    <p class="auth-note">이름만으로 간편 로그인됩니다 (MVP용)</p>
+  </section>
+</div>
+{% endblock %}
