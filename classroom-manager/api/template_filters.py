@@ -68,3 +68,8 @@ def format_tx_datetime(value: datetime | str | None) -> str | Markup:
         f'<span class="txn-datetime__time">{time_part}</span>'
         f"</span>"
     )
+
+
+def format_account_number(class_id: int, child_id: int) -> str:
+    """아이 통장 계좌번호 — 반·아이 ID 기준 고정 번호."""
+    return f"110-{int(class_id):03d}-{int(child_id):06d}"

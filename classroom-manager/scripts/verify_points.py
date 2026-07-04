@@ -82,7 +82,7 @@ def test_all() -> None:
     # 10. 아이별 거래내역
     r = client.get(f"/children/{child_id}/transactions")
     assert r.status_code == 200
-    assert "지급" in r.text and "차감" in r.text
+    assert "이체" in r.text and "차감" in r.text
     assert "10" in r.text and "7" in r.text
     print("10. OK - child transactions")
 

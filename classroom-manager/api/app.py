@@ -12,7 +12,7 @@ from starlette.middleware.sessions import SessionMiddleware
 
 from api.exceptions import LoginRequired
 from api.init_db import init_database
-from api.template_filters import format_tx_datetime
+from api.template_filters import format_account_number, format_tx_datetime
 from api.routes.auth import register_auth_routes
 from api.routes.children import register_children_routes
 from api.routes.classes import register_class_routes
@@ -43,6 +43,7 @@ app.add_middleware(
 
 templates = Jinja2Templates(directory=str(TEMPLATES_DIR))
 templates.env.filters["format_tx_datetime"] = format_tx_datetime
+templates.env.filters["format_account_number"] = format_account_number
 
 app.include_router(register_auth_routes(templates))
 app.include_router(register_main_routes(templates))

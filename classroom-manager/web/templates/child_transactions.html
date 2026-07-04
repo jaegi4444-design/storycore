@@ -1,14 +1,21 @@
 {% extends "base.html" %}
 {% from "macros.html" import bean_icon %}
 
-{% block title %}{{ child.child_name }} 거래내역 — 묘동 유치원{% endblock %}
+{% block title %}{{ child.child_name }} 묘동유치원 통장 — 묘동 유치원{% endblock %}
 
 {% block content %}
 <div class="page-container">
   <section class="app-card">
     <header class="app-card__header">
-      <p class="page-eyebrow">📒 거래내역</p>
-      <h1 class="page-title">{{ child.child_name }}</h1>
+      <p class="page-eyebrow">📒 묘동유치원 통장</p>
+      <h1 class="page-title page-title--with-account">
+        {{ child.child_name }}
+        <span class="page-title__account">
+          <span class="page-title__account-icon" aria-hidden="true">📒</span>
+          통장
+          <span class="page-title__account-no">{{ child.class_id | format_account_number(child.id) }}</span>
+        </span>
+      </h1>
       <div class="balance-box balance-box--inline">
         <span class="balance-box__label">현재 잔액</span>
         <span class="balance-box__value">
@@ -56,7 +63,7 @@
     {% else %}
     <div class="empty-state empty-state--compact">
       <div class="empty-state__icon" aria-hidden="true">📒</div>
-      <p class="empty-state__text">아직 거래내역이 없어요.</p>
+      <p class="empty-state__text">아직 통장 거래가 없어요.</p>
     </div>
     {% endif %}
 

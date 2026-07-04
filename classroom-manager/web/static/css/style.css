@@ -236,6 +236,43 @@ a {
   color: var(--text);
 }
 
+.page-title--with-account {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.65rem;
+}
+
+.page-title__account {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.2rem 0.65rem 0.25rem;
+  border-radius: 999px;
+  background: var(--surface-muted, #f5f0e6);
+  border: 1px solid var(--border, #e8dfd0);
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-muted, #6b5f52);
+  line-height: 1.2;
+}
+
+.page-title__account-icon {
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.page-title__account-no {
+  font-family: "Noto Sans KR", ui-monospace, monospace;
+  font-size: 0.88rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--text, #3d3429);
+  border-left: 1px solid var(--border, #e0d5c8);
+  margin-left: 0.15rem;
+  padding-left: 0.55rem;
+}
+
 .text-muted {
   color: var(--text-muted);
   margin: 0 0 1.25rem;
