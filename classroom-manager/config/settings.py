@@ -59,6 +59,15 @@ SESSION_SECRET_KEY = os.getenv(
     "classroom-mvp-session-secret-change-in-production",
 )
 
+# QR 코드에 인쇄할 고정 URL (미설정 시 Vercel 프로덕션 주소 사용)
+CLASSROOM_PUBLIC_URL = (
+    os.getenv("CLASSROOM_PUBLIC_URL")
+    or os.getenv("PUBLIC_APP_URL")
+    or ""
+).strip().rstrip("/")
+if not CLASSROOM_PUBLIC_URL and IS_VERCEL:
+    CLASSROOM_PUBLIC_URL = "https://classroom-manager-psi.vercel.app"
+
 UPLOAD_DIR = BASE_DIR / "uploads"
 UPLOAD_URL_PREFIX = "/uploads"
 CHILD_PHOTOS_BUCKET = os.getenv("CHILD_PHOTOS_BUCKET", "child-photos")

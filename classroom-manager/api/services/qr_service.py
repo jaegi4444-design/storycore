@@ -7,11 +7,18 @@ from fastapi import Request
 from api.entities import Child, User
 from api.qr_tokens import make_child_qr_token
 from api.repository import get_child_by_id, get_class_by_id, get_user_by_id
+from config.settings import CLASSROOM_PUBLIC_URL
 
 
-def build_child_qr_url(request: Request, child_id: int) -> str:
+def build_child_qr_url(request: Request | None, child_id: int) -> str:
+    """아이별 고정 QR URL — child_id 토큰은 변하지 않음."""
     token = make_child_qr_token(child_id)
-    base = str(request.base_url).rstrip("/")
+    if CLASSROOM_PUBLIC_URL:
+        base = CLASSROOM_PUBLIC_URL
+    elif request is not None:
+        base = str(request.base_url).rstrip("/")
+    else:
+        base = ""
     return f"{base}/q/{token}"
 
 

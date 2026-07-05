@@ -1,4 +1,8 @@
-"""아이별 QR 토큰 생성·검증."""
+"""아이별 QR 토큰 생성·검증.
+
+child_id 기준 서명 토큰이라 아이마다 고유하고, SESSION_SECRET_KEY가 바뀌지 않는 한
+동일 아이는 항상 같은 QR 토큰을 유지합니다.
+"""
 
 from __future__ import annotations
 
