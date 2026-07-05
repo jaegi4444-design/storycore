@@ -89,14 +89,23 @@
           </div>
 
           <div class="child-card__qr">
-            <canvas
-              class="child-qr-code"
-              data-qr-url="{{ item.qr_url }}"
-              width="120"
-              height="120"
-              aria-label="{{ item.child.child_name }} QR 코드"
-            ></canvas>
-            <p class="child-qr-label">스캔 → 지급·차감</p>
+            <a
+              href="{{ item.qr_url }}"
+              target="_blank"
+              rel="noopener"
+              class="child-qr-link"
+              title="{{ item.child.child_name }} QR — 웹에서 열기"
+            >
+              <img
+                src="/children/{{ item.child.id }}/qr.svg"
+                alt="{{ item.child.child_name }} QR 코드"
+                class="child-qr-image"
+                width="120"
+                height="120"
+                loading="lazy"
+              />
+            </a>
+            <p class="child-qr-label">스캔 또는 클릭 → 지급·차감</p>
           </div>
 
           <div class="action-buttons action-buttons--primary">
@@ -212,34 +221,6 @@
   {% if request.query_params.get('currency_edit') %}
   openModal();
   {% endif %}
-})();
-
-(function () {
-  var canvases = document.querySelectorAll(".child-qr-code[data-qr-url]");
-  if (!canvases.length) return;
-
-  function renderAll() {
-    if (!window.QRCode) return;
-    canvases.forEach(function (canvas) {
-      var url = canvas.getAttribute("data-qr-url");
-      if (!url) return;
-      window.QRCode.toCanvas(canvas, url, {
-        width: 120,
-        margin: 1,
-        color: { dark: "#2d4030", light: "#ffffff" },
-      });
-    });
-  }
-
-  if (window.QRCode) {
-    renderAll();
-    return;
-  }
-
-  var script = document.createElement("script");
-  script.src = "https://cdn.jsdelivr.net/npm/qrcode@1.5.4/build/qrcode.min.js";
-  script.onload = renderAll;
-  document.body.appendChild(script);
 })();
 </script>
 {% endblock %}

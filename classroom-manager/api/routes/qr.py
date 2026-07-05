@@ -5,7 +5,7 @@ from __future__ import annotations
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, Form, Request
-from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.responses import HTMLResponse, RedirectResponse, Response
 from fastapi.templating import Jinja2Templates
 
 from api.deps import (
@@ -21,7 +21,8 @@ from api.entities import User
 from api.repository import ChildAccessDeniedError, get_child_for_teacher, get_class_by_teacher
 from api.services.code_service import resolve_class_currency_name
 from api.services.point_service import deposit, get_child_balance, withdraw
-from api.services.qr_service import resolve_child_from_qr_token
+from api.services.qr_service import build_child_qr_url, resolve_child_from_qr_token
+from api.qr_image import generate_qr_svg
 from api.wallet_repository import InsufficientBalanceError, InvalidAmountError
 
 router = APIRouter(tags=["qr"])
@@ -36,6 +37,22 @@ def _require_qr_child(request: Request, child_id: int, user: User):
 
 
 def register_qr_routes(templates: Jinja2Templates) -> APIRouter:
+    @router.get("/children/{child_id}/qr.svg")
+    def child_qr_svg(
+        request: Request, child_id: int, user: User = Depends(get_current_user)
+    ):
+        try:
+            get_child_for_teacher(child_id, user)
+        except ChildAccessDeniedError:
+            return RedirectResponse(url="/login", status_code=303)
+
+        url = build_child_qr_url(request, child_id)
+        return Response(
+            content=generate_qr_svg(url),
+            media_type="image/svg+xml",
+            headers={"Cache-Control": "private, max-age=3600"},
+        )
+
     @router.get("/q/{token}")
     def qr_scan_entry(request: Request, token: str):
         resolved = resolve_child_from_qr_token(token)

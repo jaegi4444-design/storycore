@@ -1404,9 +1404,22 @@ body.modal-open {
   border: 1px dashed var(--border-soft);
 }
 
-.child-qr-code {
+.child-qr-code,
+.child-qr-image {
   display: block;
   border-radius: 8px;
+}
+
+.child-qr-link {
+  display: block;
+  line-height: 0;
+  border-radius: 8px;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.child-qr-link:hover {
+  transform: scale(1.03);
+  box-shadow: var(--shadow-sm);
 }
 
 .child-qr-label {
