@@ -88,6 +88,17 @@
             </span>
           </div>
 
+          <div class="child-card__qr">
+            <canvas
+              class="child-qr-code"
+              data-qr-url="{{ item.qr_url }}"
+              width="120"
+              height="120"
+              aria-label="{{ item.child.child_name }} QR 코드"
+            ></canvas>
+            <p class="child-qr-label">스캔 → 지급·차감</p>
+          </div>
+
           <div class="action-buttons action-buttons--primary">
             <a href="/children/{{ item.child.id }}/points/deposit" class="btn btn-success btn-sm">지급</a>
             <a href="/children/{{ item.child.id }}/points/withdraw" class="btn btn-warning btn-sm">차감</a>
@@ -201,6 +212,34 @@
   {% if request.query_params.get('currency_edit') %}
   openModal();
   {% endif %}
+})();
+
+(function () {
+  var canvases = document.querySelectorAll(".child-qr-code[data-qr-url]");
+  if (!canvases.length) return;
+
+  function renderAll() {
+    if (!window.QRCode) return;
+    canvases.forEach(function (canvas) {
+      var url = canvas.getAttribute("data-qr-url");
+      if (!url) return;
+      window.QRCode.toCanvas(canvas, url, {
+        width: 120,
+        margin: 1,
+        color: { dark: "#2d4030", light: "#ffffff" },
+      });
+    });
+  }
+
+  if (window.QRCode) {
+    renderAll();
+    return;
+  }
+
+  var script = document.createElement("script");
+  script.src = "https://cdn.jsdelivr.net/npm/qrcode@1.5.4/build/qrcode.min.js";
+  script.onload = renderAll;
+  document.body.appendChild(script);
 })();
 </script>
 {% endblock %}

@@ -9,6 +9,8 @@ from api.exceptions import LoginRequired
 from api.repository import get_user_by_id
 
 SESSION_USER_ID_KEY = "user_id"
+SESSION_QR_MODE_KEY = "qr_mode"
+SESSION_QR_CHILD_ID_KEY = "qr_child_id"
 
 
 def get_session_user_id(request: Request) -> int | None:
@@ -56,3 +58,27 @@ def flash(request: Request, message: str, category: str = "info") -> None:
 
 def pop_flashes(request: Request) -> list[dict[str, str]]:
     return request.session.pop("flash_messages", [])
+
+
+def enable_qr_mode(request: Request, child_id: int) -> None:
+    request.session[SESSION_QR_MODE_KEY] = True
+    request.session[SESSION_QR_CHILD_ID_KEY] = child_id
+
+
+def is_qr_mode(request: Request) -> bool:
+    return bool(request.session.get(SESSION_QR_MODE_KEY))
+
+
+def get_qr_child_id(request: Request) -> int | None:
+    child_id = request.session.get(SESSION_QR_CHILD_ID_KEY)
+    if child_id is None:
+        return None
+    try:
+        return int(child_id)
+    except (TypeError, ValueError):
+        return None
+
+
+def clear_qr_mode(request: Request) -> None:
+    request.session.pop(SESSION_QR_MODE_KEY, None)
+    request.session.pop(SESSION_QR_CHILD_ID_KEY, None)

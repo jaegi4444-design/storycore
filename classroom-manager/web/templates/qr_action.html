@@ -1,0 +1,29 @@
+{% extends "qr_base.html" %}
+{% from "macros.html" import bean_icon %}
+
+{% block title %}{{ child.child_name }} — QR 지급·차감{% endblock %}
+
+{% block content %}
+<section class="qr-panel">
+  <p class="qr-panel__eyebrow">📱 QR 스캔</p>
+  <h1 class="qr-panel__title">{{ child.child_name }}</h1>
+  <div class="balance-box balance-box--inline">
+    <span class="balance-box__label">현재 잔액</span>
+    <span class="balance-box__value">
+      {{ bean_icon('sm') }}
+      <strong>{{ balance }}{{ currency_name }}</strong>
+    </span>
+  </div>
+
+  <div class="qr-action-grid">
+    <a href="/qr/children/{{ child.id }}/deposit" class="qr-action-btn qr-action-btn--deposit">
+      <span class="qr-action-btn__icon">➕</span>
+      <span class="qr-action-btn__label">지급</span>
+    </a>
+    <a href="/qr/children/{{ child.id }}/withdraw" class="qr-action-btn qr-action-btn--withdraw">
+      <span class="qr-action-btn__icon">➖</span>
+      <span class="qr-action-btn__label">차감</span>
+    </a>
+  </div>
+</section>
+{% endblock %}

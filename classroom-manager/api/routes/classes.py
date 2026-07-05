@@ -21,6 +21,7 @@ from api.services.class_service import (
     verify_class_owner,
 )
 from api.services.code_service import resolve_class_currency_name
+from api.services.qr_service import build_child_qr_url
 from api.wallet_repository import get_wallets_for_children
 
 router = APIRouter(prefix="/classes", tags=["classes"])
@@ -94,6 +95,7 @@ def register_class_routes(templates: Jinja2Templates) -> APIRouter:
                     "photo_display": resolve_photo_display(child),
                     "balance": balance,
                     "currency_name": currency_name,
+                    "qr_url": build_child_qr_url(request, child.id),
                 }
             )
 

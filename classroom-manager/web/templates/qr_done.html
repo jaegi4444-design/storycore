@@ -1,0 +1,31 @@
+{% extends "qr_base.html" %}
+{% from "macros.html" import bean_icon %}
+
+{% block title %}완료 — {{ child.child_name }}{% endblock %}
+
+{% block content %}
+<section class="qr-panel qr-panel--done">
+  <div class="qr-done__icon" aria-hidden="true">✅</div>
+  <h1 class="qr-panel__title">{{ action_label }} 완료</h1>
+  <p class="qr-done__message">
+    <strong>{{ child.child_name }}</strong>에게
+    <strong>{{ amount }}{{ currency_name }}</strong>을(를) {{ action_label }}했어요.
+  </p>
+  <p class="qr-done__hint">잠시 후 창이 닫힙니다.<br />닫히지 않으면 이 창을 직접 닫아 주세요.</p>
+  <button type="button" class="btn btn-primary btn-lg" id="qr-close-btn">닫기</button>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+(function () {
+  function tryClose() {
+    window.open("", "_self");
+    window.close();
+  }
+
+  document.getElementById("qr-close-btn").addEventListener("click", tryClose);
+  setTimeout(tryClose, 1800);
+})();
+</script>
+{% endblock %}

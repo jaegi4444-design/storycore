@@ -18,6 +18,7 @@ from api.routes.children import register_children_routes
 from api.routes.classes import register_class_routes
 from api.routes.main import register_main_routes
 from api.routes.points import register_point_routes
+from api.routes.qr import register_qr_routes
 from config.settings import IS_VERCEL, SESSION_SECRET_KEY, UPLOAD_DIR
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -50,6 +51,7 @@ app.include_router(register_main_routes(templates))
 app.include_router(register_class_routes(templates))
 app.include_router(register_children_routes(templates))
 app.include_router(register_point_routes(templates))
+app.include_router(register_qr_routes(templates))
 
 app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
 if not IS_VERCEL and UPLOAD_DIR.is_dir():

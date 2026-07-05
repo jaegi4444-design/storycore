@@ -298,6 +298,26 @@ def get_class_by_teacher(teacher_user_id: int) -> SchoolClass | None:
         db.close()
 
 
+def get_class_by_id(class_id: int) -> SchoolClass | None:
+    if USE_SUPABASE:
+        client = get_supabase_client()
+        result = (
+            client.table("classes")
+            .select("*")
+            .eq("id", class_id)
+            .limit(1)
+            .execute()
+        )
+        return _class_from_row(result.data[0]) if result.data else None
+
+    db = SessionLocal()
+    try:
+        obj = db.get(SchoolClassModel, class_id)
+        return _class_from_orm(obj) if obj else None
+    finally:
+        db.close()
+
+
 def _normalize_currency_name(value: str) -> str:
     trimmed = (value or "").strip()
     if not trimmed:

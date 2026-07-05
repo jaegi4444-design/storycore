@@ -1,0 +1,12 @@
+{% extends "qr_base.html" %}
+
+{% block title %}QR 오류 — 묘동 유치원{% endblock %}
+
+{% block content %}
+<section class="qr-panel qr-panel--error">
+  <div class="qr-done__icon" aria-hidden="true">⚠️</div>
+  <h1 class="qr-panel__title">QR을 사용할 수 없어요</h1>
+  <p class="qr-done__message">{{ message }}</p>
+  <button type="button" class="btn btn-secondary" onclick="window.close()">닫기</button>
+</section>
+{% endblock %}
