@@ -15,15 +15,42 @@
     </span>
   </div>
 
-  <div class="qr-action-grid">
-    <a href="/qr/children/{{ child.id }}/deposit" class="qr-action-btn qr-action-btn--deposit">
-      <span class="qr-action-btn__icon">➕</span>
-      <span class="qr-action-btn__label">지급</span>
-    </a>
-    <a href="/qr/children/{{ child.id }}/withdraw" class="qr-action-btn qr-action-btn--withdraw">
-      <span class="qr-action-btn__icon">➖</span>
-      <span class="qr-action-btn__label">차감</span>
-    </a>
-  </div>
+  <form method="post" action="/qr/children/{{ child.id }}" class="form qr-quick-form">
+    <div class="form-group">
+      <label for="amount">{{ currency_name }} 수량</label>
+      <input
+        type="number"
+        class="form-input form-input--lg"
+        id="amount"
+        name="amount"
+        min="1"
+        step="1"
+        required
+        placeholder="1"
+        inputmode="numeric"
+        autofocus
+      />
+    </div>
+    <div class="form-group">
+      <label for="memo">메모 (선택)</label>
+      <input
+        type="text"
+        class="form-input"
+        id="memo"
+        name="memo"
+        maxlength="200"
+        placeholder="예: 숙제 잘함"
+      />
+    </div>
+    <div class="qr-submit-grid">
+      <button type="submit" name="action" value="deposit" class="btn btn-success btn-lg">
+        지급하기
+      </button>
+      <button type="submit" name="action" value="withdraw" class="btn btn-warning btn-lg">
+        차감하기
+      </button>
+    </div>
+    <p class="hint hint--center">수량 입력 후 원하는 버튼을 누르면 바로 처리됩니다.</p>
+  </form>
 </section>
 {% endblock %}

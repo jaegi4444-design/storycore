@@ -2,7 +2,8 @@
 
 from __future__ import annotations
 
-from typing import Annotated
+from typing import Annotated, Literal
+from urllib.parse import quote
 
 from fastapi import APIRouter, Depends, Form, Request
 from fastapi.responses import HTMLResponse, RedirectResponse, Response
@@ -18,11 +19,11 @@ from api.deps import (
     pop_flashes,
 )
 from api.entities import User
+from api.qr_image import generate_qr_svg
 from api.repository import ChildAccessDeniedError, get_child_for_teacher, get_class_by_teacher
 from api.services.code_service import resolve_class_currency_name
 from api.services.point_service import deposit, get_child_balance, withdraw
 from api.services.qr_service import build_child_qr_url, resolve_child_from_qr_token
-from api.qr_image import generate_qr_svg
 from api.wallet_repository import InsufficientBalanceError, InvalidAmountError
 
 router = APIRouter(tags=["qr"])
@@ -91,107 +92,44 @@ def register_qr_routes(templates: Jinja2Templates) -> APIRouter:
             },
         )
 
-    @router.get("/qr/children/{child_id}/deposit", response_class=HTMLResponse)
-    def qr_deposit_page(
-        request: Request, child_id: int, user: User = Depends(get_current_user)
-    ):
-        try:
-            child = _require_qr_child(request, child_id, user)
-            balance = get_child_balance(child_id, user)
-            school_class = get_class_by_teacher(user.id)
-        except ChildAccessDeniedError:
-            return RedirectResponse(url="/login", status_code=303)
-
-        return templates.TemplateResponse(
-            request,
-            "qr_point_deposit.html",
-            {
-                "child": child,
-                "balance": balance,
-                "currency_name": resolve_class_currency_name(school_class),
-                "flashes": pop_flashes(request),
-            },
-        )
-
-    @router.post("/qr/children/{child_id}/deposit")
-    def qr_deposit_submit(
+    @router.post("/qr/children/{child_id}")
+    def qr_action_submit(
         request: Request,
         child_id: int,
         user: User = Depends(get_current_user),
         amount: Annotated[str, Form()] = "",
         memo: Annotated[str, Form()] = "",
+        action: Annotated[Literal["deposit", "withdraw"], Form()] = "deposit",
     ):
         try:
             _require_qr_child(request, child_id, user)
-            deposit(child_id, amount, memo, user)
-        except InvalidAmountError as exc:
-            flash(request, str(exc), "error")
-            return RedirectResponse(
-                url=f"/qr/children/{child_id}/deposit", status_code=303
-            )
-        except ChildAccessDeniedError:
-            return RedirectResponse(url="/login", status_code=303)
-        except Exception as exc:
-            flash(request, f"지급 처리 중 오류가 발생했습니다: {exc}", "error")
-            return RedirectResponse(
-                url=f"/qr/children/{child_id}/deposit", status_code=303
-            )
-
-        return RedirectResponse(
-            url=f"/qr/children/{child_id}/done?action=deposit&amount={amount.strip()}",
-            status_code=303,
-        )
-
-    @router.get("/qr/children/{child_id}/withdraw", response_class=HTMLResponse)
-    def qr_withdraw_page(
-        request: Request, child_id: int, user: User = Depends(get_current_user)
-    ):
-        try:
-            child = _require_qr_child(request, child_id, user)
-            balance = get_child_balance(child_id, user)
-            school_class = get_class_by_teacher(user.id)
-        except ChildAccessDeniedError:
-            return RedirectResponse(url="/login", status_code=303)
-
-        return templates.TemplateResponse(
-            request,
-            "qr_point_withdraw.html",
-            {
-                "child": child,
-                "balance": balance,
-                "currency_name": resolve_class_currency_name(school_class),
-                "flashes": pop_flashes(request),
-            },
-        )
-
-    @router.post("/qr/children/{child_id}/withdraw")
-    def qr_withdraw_submit(
-        request: Request,
-        child_id: int,
-        user: User = Depends(get_current_user),
-        amount: Annotated[str, Form()] = "",
-        memo: Annotated[str, Form()] = "",
-    ):
-        try:
-            _require_qr_child(request, child_id, user)
-            withdraw(child_id, amount, memo, user)
+            if action == "deposit":
+                deposit(child_id, amount, memo, user)
+            else:
+                withdraw(child_id, amount, memo, user)
         except (InsufficientBalanceError, InvalidAmountError) as exc:
             flash(request, str(exc), "error")
-            return RedirectResponse(
-                url=f"/qr/children/{child_id}/withdraw", status_code=303
-            )
+            return RedirectResponse(url=f"/qr/children/{child_id}", status_code=303)
         except ChildAccessDeniedError:
             return RedirectResponse(url="/login", status_code=303)
         except Exception as exc:
-            flash(request, f"차감 처리 중 오류가 발생했습니다: {exc}", "error")
-            return RedirectResponse(
-                url=f"/qr/children/{child_id}/withdraw", status_code=303
-            )
+            label = "지급" if action == "deposit" else "차감"
+            flash(request, f"{label} 처리 중 오류가 발생했습니다: {exc}", "error")
+            return RedirectResponse(url=f"/qr/children/{child_id}", status_code=303)
 
+        amount_q = quote(amount.strip())
         return RedirectResponse(
-            url=f"/qr/children/{child_id}/done?action=withdraw&amount={amount.strip()}",
+            url=f"/qr/children/{child_id}/done?action={action}&amount={amount_q}",
             status_code=303,
         )
+
+    @router.get("/qr/children/{child_id}/deposit")
+    def qr_deposit_redirect(child_id: int):
+        return RedirectResponse(url=f"/qr/children/{child_id}", status_code=303)
+
+    @router.get("/qr/children/{child_id}/withdraw")
+    def qr_withdraw_redirect(child_id: int):
+        return RedirectResponse(url=f"/qr/children/{child_id}", status_code=303)
 
     @router.get("/qr/children/{child_id}/done", response_class=HTMLResponse)
     def qr_done_page(

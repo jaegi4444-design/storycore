@@ -1474,6 +1474,22 @@ body.modal-open {
   margin-top: 1.25rem;
 }
 
+.qr-submit-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.65rem;
+  margin-top: 0.5rem;
+}
+
+.qr-quick-form {
+  margin-top: 1.25rem;
+}
+
+.hint--center {
+  text-align: center;
+  margin-top: 0.85rem;
+}
+
 .qr-action-btn {
   display: flex;
   flex-direction: column;
