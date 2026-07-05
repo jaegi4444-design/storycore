@@ -60,7 +60,7 @@ def _class_from_row(row: dict[str, Any]) -> SchoolClass:
     currency_code = row.get("currency_code", "BEAN")
     currency_name = row.get("currency_name")
     if not currency_name:
-        currency_name = "콩" if currency_code == "BEAN" else currency_code
+        currency_name = get_currency_name(currency_code)
     return SchoolClass(
         id=row["id"],
         teacher_user_id=row["teacher_user_id"],
@@ -307,6 +307,76 @@ def _normalize_currency_name(value: str) -> str:
     return trimmed
 
 
+def _is_missing_currency_name_column(exc: Exception) -> bool:
+    text = str(exc)
+    return "currency_name" in text or "42703" in text
+
+
+def _class_currency_code(class_id: int) -> str:
+    return f"CLS_{class_id}"
+
+
+def _upsert_class_currency_label(class_id: int, currency_name: str) -> str:
+    class_code = _class_currency_code(class_id)
+    client = get_supabase_client()
+    client.table("code_table").upsert(
+        {
+            "group_code": "CURRENCY",
+            "code": class_code,
+            "code_name": currency_name,
+            "sort_order": class_id,
+            "use_yn": "Y",
+        },
+        on_conflict="group_code,code",
+    ).execute()
+    return class_code
+
+
+def _migrate_wallets_currency(class_id: int, old_code: str, new_code: str) -> None:
+    if old_code == new_code:
+        return
+
+    client = get_supabase_client()
+    children = (
+        client.table("children").select("id").eq("class_id", class_id).execute()
+    )
+    for child in children.data or []:
+        client.table("student_wallets").update({"currency_code": new_code}).eq(
+            "child_id", child["id"]
+        ).eq("currency_code", old_code).execute()
+
+
+def _apply_class_currency_fallback(
+    school_class: SchoolClass, currency_name: str
+) -> SchoolClass:
+    client = get_supabase_client()
+    class_code = _upsert_class_currency_label(school_class.id, currency_name)
+    old_code = school_class.currency_code
+
+    if old_code != class_code:
+        result = (
+            client.table("classes")
+            .update({"currency_code": class_code})
+            .eq("id", school_class.id)
+            .select()
+            .execute()
+        )
+        if not result.data:
+            raise ValueError("화폐 단위를 저장하지 못했습니다.")
+        _migrate_wallets_currency(school_class.id, old_code, class_code)
+        updated = _class_from_row(result.data[0])
+        updated.currency_name = currency_name
+        return updated
+
+    return SchoolClass(
+        id=school_class.id,
+        teacher_user_id=school_class.teacher_user_id,
+        class_name=school_class.class_name,
+        currency_code=class_code,
+        currency_name=currency_name,
+    )
+
+
 def create_class(teacher: User, class_name: str, currency_name: str = "콩") -> SchoolClass:
     if get_class_by_teacher(teacher.id):
         raise ClassAlreadyExistsError("이미 반이 존재합니다.")
@@ -329,11 +399,27 @@ def create_class(teacher: User, class_name: str, currency_name: str = "콩") -> 
                         "currency_name": normalized_currency,
                     }
                 )
+                .select()
                 .execute()
             )
         except Exception as exc:
             if "duplicate" in str(exc).lower() or "unique" in str(exc).lower():
                 raise ClassAlreadyExistsError("이미 반이 존재합니다.") from exc
+            if _is_missing_currency_name_column(exc):
+                result = (
+                    client.table("classes")
+                    .insert(
+                        {
+                            "teacher_user_id": teacher.id,
+                            "class_name": trimmed_name,
+                            "currency_code": "BEAN",
+                        }
+                    )
+                    .select()
+                    .execute()
+                )
+                school_class = _class_from_row(result.data[0])
+                return _apply_class_currency_fallback(school_class, normalized_currency)
             raise
         return _class_from_row(result.data[0])
 
@@ -390,13 +476,23 @@ def update_class_currency_name(school_class: SchoolClass, currency_name: str) ->
 
     if USE_SUPABASE:
         client = get_supabase_client()
-        result = (
-            client.table("classes")
-            .update({"currency_name": normalized_currency})
-            .eq("id", school_class.id)
-            .execute()
-        )
-        return _class_from_row(result.data[0])
+        try:
+            result = (
+                client.table("classes")
+                .update({"currency_name": normalized_currency})
+                .eq("id", school_class.id)
+                .select()
+                .execute()
+            )
+            if not result.data:
+                raise ValueError("화폐 단위를 저장하지 못했습니다.")
+            return _class_from_row(result.data[0])
+        except ValueError:
+            raise
+        except Exception as exc:
+            if _is_missing_currency_name_column(exc):
+                return _apply_class_currency_fallback(school_class, normalized_currency)
+            raise ValueError("화폐 단위 저장 중 오류가 발생했습니다.") from exc
 
     db = SessionLocal()
     try:

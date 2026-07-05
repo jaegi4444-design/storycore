@@ -145,6 +145,9 @@ def register_class_routes(templates: Jinja2Templates) -> APIRouter:
         except ValueError as exc:
             flash(request, str(exc), "error")
             return RedirectResponse(url="/classes/manage?currency_edit=1", status_code=303)
+        except Exception:
+            flash(request, "화폐 단위 저장 중 오류가 발생했습니다.", "error")
+            return RedirectResponse(url="/classes/manage?currency_edit=1", status_code=303)
 
         return RedirectResponse(url="/classes/manage", status_code=303)
 
