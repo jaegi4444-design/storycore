@@ -5,6 +5,7 @@ from api.repository import (
     InvalidCurrencyError,
     create_class,
     get_class_by_teacher,
+    update_class_currency_name,
     update_class_name,
     verify_class_owner,
 )
@@ -14,6 +15,7 @@ __all__ = [
     "InvalidCurrencyError",
     "create_class",
     "get_class_by_teacher",
+    "update_class_currency_name",
     "update_class_name",
     "verify_class_owner",
 ]

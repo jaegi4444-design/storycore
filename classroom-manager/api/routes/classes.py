@@ -16,10 +16,11 @@ from api.services.class_service import (
     InvalidCurrencyError,
     create_class,
     get_class_by_teacher,
+    update_class_currency_name,
     update_class_name,
     verify_class_owner,
 )
-from api.services.code_service import get_active_currencies, get_currency_name
+from api.services.code_service import resolve_class_currency_name
 from api.wallet_repository import get_wallets_for_children
 
 router = APIRouter(prefix="/classes", tags=["classes"])
@@ -36,14 +37,12 @@ def register_class_routes(templates: Jinja2Templates) -> APIRouter:
             flash(request, "이미 반이 존재합니다.", "error")
             return RedirectResponse(url="/classes/manage", status_code=303)
 
-        currencies = get_active_currencies()
         return templates.TemplateResponse(
             request,
             "class_create.html",
             {
                 "user": user,
-                "currencies": currencies,
-                "default_currency": "BEAN",
+                "default_currency_name": "콩",
                 "flashes": pop_flashes(request),
             },
         )
@@ -53,7 +52,7 @@ def register_class_routes(templates: Jinja2Templates) -> APIRouter:
         request: Request,
         user: User = Depends(get_current_user),
         class_name: Annotated[str, Form()] = "",
-        currency_code: Annotated[str, Form()] = "BEAN",
+        currency_name: Annotated[str, Form()] = "콩",
     ):
         existing = get_class_by_teacher(user.id)
         if existing:
@@ -61,7 +60,7 @@ def register_class_routes(templates: Jinja2Templates) -> APIRouter:
             return RedirectResponse(url="/classes/manage", status_code=303)
 
         try:
-            create_class(user, class_name, currency_code)
+            create_class(user, class_name, currency_name)
             flash(request, "반이 생성되었습니다.", "success")
             return RedirectResponse(url="/classes/manage", status_code=303)
         except ClassAlreadyExistsError as exc:
@@ -84,7 +83,7 @@ def register_class_routes(templates: Jinja2Templates) -> APIRouter:
         wallets = get_wallets_for_children(
             [c.id for c in children], school_class.currency_code
         )
-        currency_name = get_currency_name(school_class.currency_code)
+        currency_name = resolve_class_currency_name(school_class)
         child_cards = []
         for child in children:
             wallet = wallets.get(child.id)
@@ -126,6 +125,26 @@ def register_class_routes(templates: Jinja2Templates) -> APIRouter:
             flash(request, "반 이름이 수정되었습니다.", "success")
         except ValueError as exc:
             flash(request, str(exc), "error")
+
+        return RedirectResponse(url="/classes/manage", status_code=303)
+
+    @router.post("/update-currency")
+    def class_update_currency_submit(
+        request: Request,
+        user: User = Depends(get_current_user),
+        currency_name: Annotated[str, Form()] = "",
+    ):
+        school_class = get_class_by_teacher(user.id)
+        if school_class is None or not verify_class_owner(school_class, user):
+            flash(request, "접근 권한이 없습니다.", "error")
+            return RedirectResponse(url="/", status_code=303)
+
+        try:
+            update_class_currency_name(school_class, currency_name)
+            flash(request, "화폐 단위가 수정되었습니다.", "success")
+        except ValueError as exc:
+            flash(request, str(exc), "error")
+            return RedirectResponse(url="/classes/manage?currency_edit=1", status_code=303)
 
         return RedirectResponse(url="/classes/manage", status_code=303)
 

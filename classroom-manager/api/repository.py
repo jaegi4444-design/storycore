@@ -57,11 +57,16 @@ def _code_from_row(row: dict[str, Any]) -> CodeTable:
 
 
 def _class_from_row(row: dict[str, Any]) -> SchoolClass:
+    currency_code = row.get("currency_code", "BEAN")
+    currency_name = row.get("currency_name")
+    if not currency_name:
+        currency_name = "콩" if currency_code == "BEAN" else currency_code
     return SchoolClass(
         id=row["id"],
         teacher_user_id=row["teacher_user_id"],
         class_name=row["class_name"],
-        currency_code=row.get("currency_code", "BEAN"),
+        currency_code=currency_code,
+        currency_name=currency_name,
     )
 
 
@@ -98,6 +103,7 @@ def _class_from_orm(obj: SchoolClassModel) -> SchoolClass:
         teacher_user_id=obj.teacher_user_id,
         class_name=obj.class_name,
         currency_code=obj.currency_code,
+        currency_name=obj.currency_name,
     )
 
 
@@ -161,6 +167,16 @@ def _migrate_sqlite_schema() -> None:
         with engine.begin() as conn:
             conn.execute(
                 text("ALTER TABLE children ADD COLUMN deleted_yn VARCHAR(1) NOT NULL DEFAULT 'N'")
+            )
+
+    if "classes" not in inspector.get_table_names():
+        return
+
+    class_columns = {col["name"] for col in inspector.get_columns("classes")}
+    if "currency_name" not in class_columns:
+        with engine.begin() as conn:
+            conn.execute(
+                text("ALTER TABLE classes ADD COLUMN currency_name VARCHAR(100) NOT NULL DEFAULT '콩'")
             )
 
 
@@ -282,15 +298,23 @@ def get_class_by_teacher(teacher_user_id: int) -> SchoolClass | None:
         db.close()
 
 
-def create_class(teacher: User, class_name: str, currency_code: str = "BEAN") -> SchoolClass:
+def _normalize_currency_name(value: str) -> str:
+    trimmed = (value or "").strip()
+    if not trimmed:
+        raise ValueError("화폐 단위를 입력해 주세요.")
+    if len(trimmed) > 20:
+        raise ValueError("화폐 단위는 20자 이내로 입력해 주세요.")
+    return trimmed
+
+
+def create_class(teacher: User, class_name: str, currency_name: str = "콩") -> SchoolClass:
     if get_class_by_teacher(teacher.id):
         raise ClassAlreadyExistsError("이미 반이 존재합니다.")
 
     trimmed_name = class_name.strip()
     if not trimmed_name:
         raise ValueError("반 이름을 입력해 주세요.")
-    if not is_valid_currency_code(currency_code):
-        raise InvalidCurrencyError("유효하지 않은 화폐 단위입니다.")
+    normalized_currency = _normalize_currency_name(currency_name)
 
     if USE_SUPABASE:
         client = get_supabase_client()
@@ -301,7 +325,8 @@ def create_class(teacher: User, class_name: str, currency_code: str = "BEAN") ->
                     {
                         "teacher_user_id": teacher.id,
                         "class_name": trimmed_name,
-                        "currency_code": currency_code,
+                        "currency_code": "CUSTOM",
+                        "currency_name": normalized_currency,
                     }
                 )
                 .execute()
@@ -317,7 +342,8 @@ def create_class(teacher: User, class_name: str, currency_code: str = "BEAN") ->
         obj = SchoolClassModel(
             teacher_user_id=teacher.id,
             class_name=trimmed_name,
-            currency_code=currency_code,
+            currency_code="CUSTOM",
+            currency_name=normalized_currency,
         )
         db.add(obj)
         try:
@@ -352,6 +378,32 @@ def update_class_name(school_class: SchoolClass, class_name: str) -> SchoolClass
         if obj is None:
             raise ValueError("반을 찾을 수 없습니다.")
         obj.class_name = trimmed_name
+        db.commit()
+        db.refresh(obj)
+        return _class_from_orm(obj)
+    finally:
+        db.close()
+
+
+def update_class_currency_name(school_class: SchoolClass, currency_name: str) -> SchoolClass:
+    normalized_currency = _normalize_currency_name(currency_name)
+
+    if USE_SUPABASE:
+        client = get_supabase_client()
+        result = (
+            client.table("classes")
+            .update({"currency_name": normalized_currency})
+            .eq("id", school_class.id)
+            .execute()
+        )
+        return _class_from_row(result.data[0])
+
+    db = SessionLocal()
+    try:
+        obj = db.get(SchoolClassModel, school_class.id)
+        if obj is None:
+            raise ValueError("반을 찾을 수 없습니다.")
+        obj.currency_name = normalized_currency
         db.commit()
         db.refresh(obj)
         return _class_from_orm(obj)

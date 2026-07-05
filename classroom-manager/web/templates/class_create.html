@@ -27,17 +27,19 @@
     </div>
 
     <div class="form-group">
-      <label for="currency_code" class="currency-label">
+      <label for="currency_name" class="currency-label">
         화폐 단위 {{ bean_icon('sm') }}
       </label>
-      <select id="currency_code" name="currency_code" required>
-        {% for currency in currencies %}
-        <option value="{{ currency.code }}" {% if currency.code == default_currency %}selected{% endif %}>
-          {{ currency.code_name }}
-        </option>
-        </option>
-        {% endfor %}
-      </select>
+      <input
+        type="text"
+        id="currency_name"
+        name="currency_name"
+        value="{{ default_currency_name }}"
+        placeholder="예: 콩, 별, 도장"
+        required
+        maxlength="20"
+      />
+      <p class="hint">우리 반만의 화폐 이름을 직접 입력해 주세요.</p>
     </div>
 
     <div class="form-actions">

@@ -29,7 +29,7 @@ def test_all() -> None:
     # 3. 로그인 후 반을 만들 수 있다
     r = client.post(
         "/classes/create",
-        data={"class_name": "3학년 2반", "currency_code": "BEAN"},
+        data={"class_name": "3학년 2반", "currency_name": "콩"},
         follow_redirects=False,
     )
     assert r.status_code == 303
@@ -44,7 +44,7 @@ def test_all() -> None:
     assert "/classes/manage" in r.headers["location"]
     r = client.post(
         "/classes/create",
-        data={"class_name": "다른반", "currency_code": "BEAN"},
+        data={"class_name": "다른반", "currency_name": "별"},
         follow_redirects=False,
     )
     assert r.status_code == 303

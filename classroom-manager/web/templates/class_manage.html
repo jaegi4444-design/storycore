@@ -17,10 +17,13 @@
         <span class="stat-card__label">반 이름</span>
         <span class="stat-card__value">{{ school_class.class_name }}</span>
       </div>
-      <div class="stat-card">
+      <div class="stat-card stat-card--editable">
         <span class="stat-card__icon" aria-hidden="true">{{ bean_icon('sm') }}</span>
         <span class="stat-card__label">화폐 단위</span>
-        <span class="stat-card__value stat-card__value--currency">{{ currency_name }}</span>
+        <span class="stat-card__value stat-card__value--currency" id="currency-display">{{ currency_name }}</span>
+        <button type="button" class="stat-card__edit" id="currency-edit-open" aria-haspopup="dialog">
+          ✏️ 수정
+        </button>
       </div>
       <div class="stat-card">
         <span class="stat-card__icon" aria-hidden="true">🌱</span>
@@ -118,4 +121,86 @@
     <a href="/" class="btn btn-ghost">← 메인으로</a>
   </div>
 </div>
+
+<div class="modal" id="currency-modal" hidden aria-hidden="true">
+  <div class="modal__backdrop" data-modal-close></div>
+  <div
+    class="modal__panel"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="currency-modal-title"
+  >
+    <header class="modal__header">
+      <p class="modal__eyebrow">{{ bean_icon('sm') }} 화폐 설정</p>
+      <h2 class="modal__title" id="currency-modal-title">화폐 단위 수정</h2>
+    </header>
+
+    <form method="post" action="/classes/update-currency" class="form">
+      <div class="form-group">
+        <label for="currency_name">화폐 단위</label>
+        <input
+          type="text"
+          class="form-input"
+          id="currency_name"
+          name="currency_name"
+          value="{{ currency_name }}"
+          placeholder="예: 콩, 별, 도장"
+          required
+          maxlength="20"
+          autocomplete="off"
+        />
+        <p class="hint">우리 반 화폐 이름을 입력해 주세요. 저장하면 화면이 새로고침됩니다.</p>
+      </div>
+
+      <div class="modal__actions">
+        <button type="button" class="btn btn-secondary" data-modal-close>취소</button>
+        <button type="submit" class="btn btn-primary">저장하기</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+(function () {
+  var modal = document.getElementById("currency-modal");
+  var openBtn = document.getElementById("currency-edit-open");
+  var input = document.getElementById("currency_name");
+  if (!modal || !openBtn) return;
+
+  function openModal() {
+    modal.hidden = false;
+    modal.setAttribute("aria-hidden", "false");
+    document.body.classList.add("modal-open");
+    if (input) {
+      input.focus();
+      input.select();
+    }
+  }
+
+  function closeModal() {
+    modal.hidden = true;
+    modal.setAttribute("aria-hidden", "true");
+    document.body.classList.remove("modal-open");
+    openBtn.focus();
+  }
+
+  openBtn.addEventListener("click", openModal);
+
+  modal.querySelectorAll("[data-modal-close]").forEach(function (el) {
+    el.addEventListener("click", closeModal);
+  });
+
+  document.addEventListener("keydown", function (event) {
+    if (event.key === "Escape" && !modal.hidden) {
+      closeModal();
+    }
+  });
+
+  {% if request.query_params.get('currency_edit') %}
+  openModal();
+  {% endif %}
+})();
+</script>
 {% endblock %}

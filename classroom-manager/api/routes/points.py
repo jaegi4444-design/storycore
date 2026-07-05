@@ -12,7 +12,7 @@ from api.deps import flash, get_current_user, pop_flashes
 from api.entities import User
 from api.repository import ChildAccessDeniedError, get_child_for_teacher, get_class_by_teacher
 from api.services.class_service import verify_class_owner
-from api.services.code_service import get_currency_name
+from api.services.code_service import resolve_class_currency_name
 from api.services.point_service import (
     deposit,
     get_child_balance,
@@ -47,7 +47,7 @@ def register_point_routes(templates: Jinja2Templates) -> APIRouter:
                 "user": user,
                 "child": child,
                 "balance": balance,
-                "currency_name": get_currency_name(school_class.currency_code) if school_class else "콩",
+                "currency_name": resolve_class_currency_name(school_class),
                 "flashes": pop_flashes(request),
             },
         )
@@ -92,7 +92,7 @@ def register_point_routes(templates: Jinja2Templates) -> APIRouter:
                 "user": user,
                 "child": child,
                 "balance": balance,
-                "currency_name": get_currency_name(school_class.currency_code) if school_class else "콩",
+                "currency_name": resolve_class_currency_name(school_class),
                 "flashes": pop_flashes(request),
             },
         )
@@ -145,7 +145,7 @@ def register_point_routes(templates: Jinja2Templates) -> APIRouter:
                 "user": user,
                 "child": child,
                 "balance": balance,
-                "currency_name": get_currency_name(school_class.currency_code) if school_class else "콩",
+                "currency_name": resolve_class_currency_name(school_class),
                 "transactions": tx_rows,
                 "flashes": pop_flashes(request),
             },
@@ -175,7 +175,7 @@ def register_point_routes(templates: Jinja2Templates) -> APIRouter:
             {
                 "user": user,
                 "school_class": school_class,
-                "currency_name": get_currency_name(school_class.currency_code),
+                "currency_name": resolve_class_currency_name(school_class),
                 "transactions": tx_rows,
                 "flashes": pop_flashes(request),
             },

@@ -22,7 +22,7 @@ def test_all() -> None:
     # 반 생성
     client.post(
         "/classes/create",
-        data={"class_name": "포인트반", "currency_code": "BEAN"},
+        data={"class_name": "포인트반", "currency_name": "콩"},
         follow_redirects=False,
     )
 

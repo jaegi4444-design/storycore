@@ -57,6 +57,7 @@ class SchoolClass(Base):
     )
     class_name: Mapped[str] = mapped_column(String(100), nullable=False)
     currency_code: Mapped[str] = mapped_column(String(50), nullable=False, default="BEAN")
+    currency_name: Mapped[str] = mapped_column(String(100), nullable=False, default="콩")
     created_at: Mapped[datetime] = mapped_column(
         DateTime, server_default=func.now(), nullable=False
     )

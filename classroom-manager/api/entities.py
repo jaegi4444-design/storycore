@@ -32,6 +32,7 @@ class SchoolClass:
     teacher_user_id: int
     class_name: str
     currency_code: str = "BEAN"
+    currency_name: str = "콩"
     created_at: datetime | None = None
     updated_at: datetime | None = None
 
