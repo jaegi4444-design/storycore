@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% from "macros.html" import bean_icon %}
+
+{% block title %}아이들 QR 목록 — {{ school_class.class_name }}{% endblock %}
+
+{% block content %}
+<div class="page-container">
+  <section class="app-card">
+    <header class="app-card__header">
+      <p class="page-eyebrow">📱 QR 목록</p>
+      <h1 class="page-title">{{ school_class.class_name }}</h1>
+      <p class="app-card__meta">
+        아이별 QR을 인쇄하거나 스캔·클릭하여 {{ currency_name }} 지급·차감할 수 있어요.
+      </p>
+    </header>
+
+    {% if children %}
+    <div class="qr-list-grid">
+      {% for item in children %}
+      <article class="qr-list-card">
+        <div class="qr-list-card__profile">
+          <img
+            src="{{ item.photo_display }}"
+            alt="{{ item.child.child_name }} 프로필"
+            class="qr-list-card__avatar"
+            loading="lazy"
+          />
+        </div>
+        <h2 class="qr-list-card__name">{{ item.child.child_name }}</h2>
+        {% if item.child.company_name %}
+        <p class="qr-list-card__company">🏢 {{ item.child.company_name }}</p>
+        {% endif %}
+        <a
+          href="{{ item.qr_url }}"
+          target="_blank"
+          rel="noopener"
+          class="child-qr-link qr-list-card__qr-link"
+          title="{{ item.child.child_name }} QR — 웹에서 열기"
+        >
+          <img
+            src="/children/{{ item.child.id }}/qr.svg"
+            alt="{{ item.child.child_name }} QR 코드"
+            class="child-qr-image qr-list-card__qr"
+            width="160"
+            height="160"
+            loading="lazy"
+          />
+        </a>
+        <p class="child-qr-label">스캔 또는 클릭 → 지급·차감</p>
+      </article>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state empty-state--compact">
+      <div class="empty-state__icon" aria-hidden="true">📱</div>
+      <p class="empty-state__text">등록된 아이가 없어요.<br />아이를 추가하면 QR이 생성됩니다.</p>
+      <a href="/children/add" class="btn btn-primary">아이 추가</a>
+    </div>
+    {% endif %}
+
+    <div class="back-link back-link--left">
+      <a href="/classes/manage" class="btn btn-secondary">← 내 반 관리</a>
+    </div>
+  </section>
+</div>
+{% endblock %}

@@ -71,20 +71,10 @@ def register_class_routes(templates: Jinja2Templates) -> APIRouter:
             flash(request, str(exc), "error")
             return RedirectResponse(url="/classes/create", status_code=303)
 
-    @router.get("/manage", response_class=HTMLResponse)
-    def class_manage_page(
-        request: Request,
-        user: User = Depends(get_current_user),
-    ):
-        school_class = get_class_by_teacher(user.id)
-        if school_class is None:
-            return RedirectResponse(url="/classes/create", status_code=303)
-
-        children = get_children_by_class(school_class.id)
+    def _child_cards_for_class(request: Request, school_class, children, currency_name):
         wallets = get_wallets_for_children(
             [c.id for c in children], school_class.currency_code
         )
-        currency_name = resolve_class_currency_name(school_class)
         child_cards = []
         for child in children:
             wallet = wallets.get(child.id)
@@ -98,10 +88,49 @@ def register_class_routes(templates: Jinja2Templates) -> APIRouter:
                     "qr_url": build_child_qr_url(request, child.id),
                 }
             )
+        return child_cards
+
+    @router.get("/manage", response_class=HTMLResponse)
+    def class_manage_page(
+        request: Request,
+        user: User = Depends(get_current_user),
+    ):
+        school_class = get_class_by_teacher(user.id)
+        if school_class is None:
+            return RedirectResponse(url="/classes/create", status_code=303)
+
+        children = get_children_by_class(school_class.id)
+        currency_name = resolve_class_currency_name(school_class)
+        child_cards = _child_cards_for_class(request, school_class, children, currency_name)
 
         return templates.TemplateResponse(
             request,
             "class_manage.html",
+            {
+                "user": user,
+                "school_class": school_class,
+                "currency_name": currency_name,
+                "children": child_cards,
+                "flashes": pop_flashes(request),
+            },
+        )
+
+    @router.get("/my/qr-list", response_class=HTMLResponse)
+    def children_qr_list_page(
+        request: Request,
+        user: User = Depends(get_current_user),
+    ):
+        school_class = get_class_by_teacher(user.id)
+        if school_class is None:
+            return RedirectResponse(url="/classes/create", status_code=303)
+
+        children = get_children_by_class(school_class.id)
+        currency_name = resolve_class_currency_name(school_class)
+        child_cards = _child_cards_for_class(request, school_class, children, currency_name)
+
+        return templates.TemplateResponse(
+            request,
+            "children_qr_list.html",
             {
                 "user": user,
                 "school_class": school_class,

@@ -1567,6 +1567,59 @@ body.modal-open {
   line-height: 1.5;
 }
 
+.qr-list-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-top: 1.25rem;
+}
+
+.qr-list-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 1.15rem 1rem;
+  background: var(--surface);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+.qr-list-card__profile {
+  margin-bottom: 0.5rem;
+}
+
+.qr-list-card__avatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--border-soft);
+}
+
+.qr-list-card__name {
+  margin: 0 0 0.25rem;
+  font-family: "Gowun Dodum", "Noto Sans KR", sans-serif;
+  font-size: 1.1rem;
+  font-weight: 400;
+}
+
+.qr-list-card__company {
+  margin: 0 0 0.5rem;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+.qr-list-card__qr-link {
+  margin: 0.35rem 0;
+}
+
+.qr-list-card__qr {
+  width: 160px;
+  height: 160px;
+}
+
 /* ============================================================
    Responsive
    ============================================================ */
