@@ -18,8 +18,8 @@ from api.supabase_client import get_supabase_client
 from config.settings import USE_SUPABASE
 
 TRANSACTION_TYPE_LABELS = {
-    "DEPOSIT": "이체",
-    "WITHDRAW": "차감",
+    "DEPOSIT": "입금",
+    "WITHDRAW": "출금",
     "ADJUST": "조정",
     "TRANSFER_IN": "입금",
     "TRANSFER_OUT": "출금",

@@ -1,7 +1,7 @@
 {% extends "qr_base.html" %}
 {% from "macros.html" import bean_icon %}
 
-{% block title %}{{ child.child_name }} — QR 지급·차감{% endblock %}
+{% block title %}{{ child.child_name }} — QR 입금·출금{% endblock %}
 
 {% block content %}
 <section class="qr-panel">
@@ -44,10 +44,10 @@
     </div>
     <div class="qr-submit-grid">
       <button type="submit" name="action" value="deposit" class="btn btn-success btn-lg">
-        지급하기
+        입금하기
       </button>
       <button type="submit" name="action" value="withdraw" class="btn btn-warning btn-lg">
-        차감하기
+        출금하기
       </button>
     </div>
     <p class="hint hint--center">수량 입력 후 원하는 버튼을 누르면 바로 처리됩니다.</p>

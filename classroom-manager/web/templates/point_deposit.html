@@ -1,13 +1,12 @@
 {% extends "base.html" %}
 {% from "macros.html" import bean_icon %}
 
-{% block title %}콩 지급 — 묘동 유치원{% endblock %}
+{% block title %}콩 입금 — 묘동 유치원{% endblock %}
 
 {% block content %}
 <div class="page-container page-container--narrow">
   <section class="form-card">
     <header class="form-card__header">
-      <p class="page-eyebrow">🫘 콩 지급</p>
       <h1 class="form-card__title">{{ child.child_name }}</h1>
       <div class="balance-box">
         <span class="balance-box__label">현재 잔액</span>
@@ -20,7 +19,7 @@
 
     <form method="post" action="/children/{{ child.id }}/points/deposit" class="form">
       <div class="form-group">
-        <label for="amount">지급할 {{ currency_name }} 수량</label>
+        <label for="amount">입금할 {{ currency_name }} 수량</label>
         <input
           type="number"
           class="form-input"
@@ -46,7 +45,7 @@
       </div>
       <div class="form-actions">
         <a href="/classes/manage" class="btn btn-secondary">취소</a>
-        <button type="submit" class="btn btn-success">지급하기</button>
+        <button type="submit" class="btn btn-success">입금하기</button>
       </div>
     </form>
   </section>

@@ -1,4 +1,4 @@
-"""포인트(콩) 지급·차감·거래내역 라우트."""
+"""포인트(콩) 입금·출금·거래내역 라우트."""
 
 from __future__ import annotations
 
@@ -62,7 +62,7 @@ def register_point_routes(templates: Jinja2Templates) -> APIRouter:
     ):
         try:
             deposit(child_id, amount, memo, user)
-            flash(request, "콩이 지급되었습니다.", "success")
+            flash(request, "입금이 완료되었습니다.", "success")
         except InvalidAmountError as exc:
             flash(request, str(exc), "error")
             return RedirectResponse(url=f"/children/{child_id}/points/deposit", status_code=303)
@@ -70,7 +70,7 @@ def register_point_routes(templates: Jinja2Templates) -> APIRouter:
             flash(request, str(exc), "error")
             return RedirectResponse(url="/classes/manage", status_code=303)
         except Exception as exc:
-            flash(request, f"지급 처리 중 오류가 발생했습니다: {exc}", "error")
+            flash(request, f"입금 처리 중 오류가 발생했습니다: {exc}", "error")
             return RedirectResponse(url=f"/children/{child_id}/points/deposit", status_code=303)
 
         return RedirectResponse(url="/classes/manage", status_code=303)
@@ -107,7 +107,7 @@ def register_point_routes(templates: Jinja2Templates) -> APIRouter:
     ):
         try:
             withdraw(child_id, amount, memo, user)
-            flash(request, "콩이 차감되었습니다.", "success")
+            flash(request, "출금이 완료되었습니다.", "success")
         except (InsufficientBalanceError, InvalidAmountError) as exc:
             flash(request, str(exc), "error")
             return RedirectResponse(url=f"/children/{child_id}/points/withdraw", status_code=303)
@@ -115,7 +115,7 @@ def register_point_routes(templates: Jinja2Templates) -> APIRouter:
             flash(request, str(exc), "error")
             return RedirectResponse(url="/classes/manage", status_code=303)
         except Exception as exc:
-            flash(request, f"차감 처리 중 오류가 발생했습니다: {exc}", "error")
+            flash(request, f"출금 처리 중 오류가 발생했습니다: {exc}", "error")
             return RedirectResponse(url=f"/children/{child_id}/points/withdraw", status_code=303)
 
         return RedirectResponse(url="/classes/manage", status_code=303)

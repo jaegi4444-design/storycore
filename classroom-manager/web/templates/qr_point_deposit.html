@@ -1,11 +1,11 @@
 {% extends "qr_base.html" %}
 {% from "macros.html" import bean_icon %}
 
-{% block title %}{{ child.child_name }} 지급{% endblock %}
+{% block title %}{{ child.child_name }} 입금{% endblock %}
 
 {% block content %}
 <section class="qr-panel">
-  <p class="qr-panel__eyebrow">➕ 지급</p>
+  <p class="qr-panel__eyebrow">➕ 입금</p>
   <h1 class="qr-panel__title">{{ child.child_name }}</h1>
   <div class="balance-box balance-box--inline">
     <span class="balance-box__label">현재 잔액</span>
@@ -17,7 +17,7 @@
 
   <form method="post" action="/qr/children/{{ child.id }}/deposit" class="form">
     <div class="form-group">
-      <label for="amount">지급할 {{ currency_name }} 수량</label>
+      <label for="amount">입금할 {{ currency_name }} 수량</label>
       <input
         type="number"
         class="form-input form-input--lg"
@@ -44,7 +44,7 @@
     </div>
     <div class="qr-form-actions">
       <a href="/qr/children/{{ child.id }}" class="btn btn-secondary">뒤로</a>
-      <button type="submit" class="btn btn-success btn-lg">지급하기</button>
+      <button type="submit" class="btn btn-success btn-lg">입금하기</button>
     </div>
   </form>
 </section>

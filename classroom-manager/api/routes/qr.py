@@ -1,4 +1,4 @@
-"""QR 스캔 — 선생님 자동 로그인 후 지급·차감."""
+"""QR 스캔 — 선생님 자동 로그인 후 입금·출금."""
 
 from __future__ import annotations
 
@@ -113,7 +113,7 @@ def register_qr_routes(templates: Jinja2Templates) -> APIRouter:
         except ChildAccessDeniedError:
             return RedirectResponse(url="/login", status_code=303)
         except Exception as exc:
-            label = "지급" if action == "deposit" else "차감"
+            label = "입금" if action == "deposit" else "출금"
             flash(request, f"{label} 처리 중 오류가 발생했습니다: {exc}", "error")
             return RedirectResponse(url=f"/qr/children/{child_id}", status_code=303)
 
@@ -145,7 +145,7 @@ def register_qr_routes(templates: Jinja2Templates) -> APIRouter:
         except ChildAccessDeniedError:
             return RedirectResponse(url="/login", status_code=303)
 
-        action_label = "지급" if action == "deposit" else "차감"
+        action_label = "입금" if action == "deposit" else "출금"
         return templates.TemplateResponse(
             request,
             "qr_done.html",

@@ -1,4 +1,4 @@
-"""포인트(콩) 지급·차감 서비스."""
+"""포인트(콩) 입금·출금 서비스."""
 
 from __future__ import annotations
 
@@ -82,7 +82,7 @@ def withdraw(child_id: int, amount: int | str, memo: str | None, teacher: User) 
     if wallet is None:
         raise WalletNotFoundError()
     if wallet.balance < parsed_amount:
-        raise InsufficientBalanceError("현재 잔액보다 큰 금액은 차감할 수 없습니다.")
+        raise InsufficientBalanceError("현재 잔액보다 큰 금액은 출금할 수 없습니다.")
 
     try:
         return withdraw_atomic(child.id, parsed_amount, _normalize_memo(memo), teacher.id)
@@ -94,7 +94,7 @@ def withdraw(child_id: int, amount: int | str, memo: str | None, teacher: User) 
         raise
     except Exception as exc:
         if "INSUFFICIENT_BALANCE" in str(exc):
-            raise InsufficientBalanceError("현재 잔액보다 큰 금액은 차감할 수 없습니다.") from exc
+            raise InsufficientBalanceError("현재 잔액보다 큰 금액은 출금할 수 없습니다.") from exc
         if "INVALID_AMOUNT" in str(exc):
             raise InvalidAmountError("수량은 1 이상이어야 합니다.") from exc
         if "ACCESS_DENIED" in str(exc):

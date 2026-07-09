@@ -1,13 +1,12 @@
 {% extends "base.html" %}
 {% from "macros.html" import bean_icon %}
 
-{% block title %}콩 차감 — 묘동 유치원{% endblock %}
+{% block title %}콩 출금 — 묘동 유치원{% endblock %}
 
 {% block content %}
 <div class="page-container page-container--narrow">
   <section class="form-card form-card--withdraw">
     <header class="form-card__header">
-      <p class="page-eyebrow page-eyebrow--warning">🫘 콩 차감</p>
       <h1 class="form-card__title">{{ child.child_name }}</h1>
       <div class="balance-box">
         <span class="balance-box__label">현재 잔액</span>
@@ -20,7 +19,7 @@
 
     <form method="post" action="/children/{{ child.id }}/points/withdraw" class="form">
       <div class="form-group">
-        <label for="amount">차감할 {{ currency_name }} 수량</label>
+        <label for="amount">출금할 {{ currency_name }} 수량</label>
         <input
           type="number"
           class="form-input"
@@ -33,7 +32,7 @@
           placeholder="1"
           inputmode="numeric"
         />
-        <p class="hint hint--box">최대 {{ balance }}{{ currency_name }}까지 차감할 수 있어요.</p>
+        <p class="hint hint--box">최대 {{ balance }}{{ currency_name }}까지 출금할 수 있어요.</p>
       </div>
       <div class="form-group">
         <label for="memo">메모 (선택)</label>
@@ -48,7 +47,7 @@
       </div>
       <div class="form-actions">
         <a href="/classes/manage" class="btn btn-secondary">취소</a>
-        <button type="submit" class="btn btn-warning">차감하기</button>
+        <button type="submit" class="btn btn-warning">출금하기</button>
       </div>
     </form>
   </section>

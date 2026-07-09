@@ -17,6 +17,7 @@ from api.services.child_service import (
     get_child_for_teacher,
     resolve_photo_display,
     save_photo_upload,
+    update_child,
 )
 from api.services.class_service import get_class_by_teacher, verify_class_owner
 
